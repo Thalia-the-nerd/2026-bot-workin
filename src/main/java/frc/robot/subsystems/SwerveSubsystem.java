@@ -64,6 +64,8 @@ public class SwerveSubsystem extends SubsystemBase {
     // ABSOLUTELY REQUIRED for the robot to know where it is.
     if (swerveDrive != null) {
       swerveDrive.updateOdometry();
+      // Update the Field2d visualization with current robot pose
+      m_field.setRobotPose(swerveDrive.getPose());
     }
   }
 
