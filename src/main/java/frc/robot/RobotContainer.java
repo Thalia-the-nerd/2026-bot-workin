@@ -60,7 +60,9 @@ public class RobotContainer {
     );
 
     // Map "Back" button to zero the gyro (reset field orientation)
-    driverXbox.back().onTrue(Commands.runOnce(drivebase.getSwerveDrive()::zeroGyro, drivebase));
+    if (drivebase.getSwerveDrive() != null) {
+      driverXbox.back().onTrue(Commands.runOnce(drivebase.getSwerveDrive()::zeroGyro, drivebase));
+    }
   }
 
   /**
