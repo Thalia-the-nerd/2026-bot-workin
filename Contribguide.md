@@ -21,7 +21,7 @@ This project uses YAGSL for swerve drive control. Run the following command to d
 
 ## Development Environment
 
-### VS Code Setup (Windows/Mac/Linux)
+### VS Code Setup (Windows/Mac/Linux) (Ewwwwwwwww)
 
 1. Install the WPILib 2025 suite.
 2. Open the project folder in VS Code.
