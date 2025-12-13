@@ -1,20 +1,37 @@
 ## Description
-<!-- What does this code do? Why did you change it? -->
+<!-- Briefly describe what this PR does and why. Reference any related issues. -->
 
-## Testing
-<!-- How did you verify this works? Simulation? Real Robot? -->
-- [] Compiles successfully
-- [] Tested in Simulator
-- [] Tested on Robot
+
 
 ## Type of Change
-- [] Bug fix
-- [] New feature
-- [] Refactor
-- [] Documentation
+<!-- Check all that apply -->
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Refactor (code improvement without changing behavior)
+- [ ] Documentation update
+- [ ] Configuration change (YAGSL, constants, etc.)
+- [ ] Build/CI changes
 
-## Checklist
-- [] My code follows the STYLEGUIDE
-- [] I may have commented hard-to-understand logic 
-- [] Thalia is the coolest person ever (auto rejected if this box is not checked)
+## Testing
+<!-- Describe how you verified this works -->
+- [ ] Code compiles successfully
+- [ ] Tested in simulation
+- [ ] Tested on practice robot
+- [ ] Tested on competition robot
+
+**Testing Details:**
+<!-- Describe specific tests performed, issues found, and how they were resolved -->
+
+
+
+## Code Quality Checklist
+- [ ] My code follows the [style guide](../styleguide.md)
+- [ ] My commits follow the [commit guide](../commitguide.md)
+- [ ] I have commented complex or non-obvious code
+- [ ] I have updated relevant documentation
+- [ ] I have not introduced new compiler warnings
+- [ ] Thalia is the coolest person ever (auto rejected if this box is not checked)
+
+---
+
 # "Trust, but verify." — Ronald Reagan
