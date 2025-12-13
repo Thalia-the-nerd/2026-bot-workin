@@ -1,2 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Error><Code>NoSuchBucket</Code><Message>The specified bucket does not exist</Message><BucketName>thriftybot-software</BucketName><RequestId>QNY60NZE2GEGQA3F</RequestId><HostId>9AI3LL2tRfuQkqznjru+i72l8pQT2f98PEMkFF/0hwBHd+A3DI312R5wywQ0jnOZSfsrX428x9Ijg4aRy8c1QpQkIAHldt2MfzYcJ2M6pPA=</HostId></Error>
+{
+    "fileName": "ThriftyLib.json",
+    "name": "ThriftyLib",
+    "version": "2025.0.0",
+    "frcYear": 2025,
+    "uuid": "60b2694b-9e6e-4026-81ee-6f167946f4b0",
+    "mavenUrls": [
+        "https://thriftybot-software.s3.amazonaws.com/maven"
+    ],
+    "jsonUrl": "https://thriftybot-software.s3.amazonaws.com/ThriftyLib_2025.json",
+    "jniDependencies": [],
+    "cppDependencies": [],
+    "javaDependencies": [
+        {
+            "groupId": "com.thethriftybot",
+            "artifactId": "ThriftyLib-java",
+            "version": "2025.0.0"
+        }
+    ]
+}
