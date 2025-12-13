@@ -1,9 +1,12 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.io.File;
 import swervelib.SwerveDrive;
@@ -14,6 +17,9 @@ public class SwerveSubsystem extends SubsystemBase {
   // The heavy lifting object from YAGSL
   // Note: This is null during simulation/testing when RobotBase.isReal() returns false
   private SwerveDrive swerveDrive;
+
+  // Field2d object for visualization in simulation and SmartDashboard
+  private final Field2d m_field = new Field2d();
 
   // Maximum speed in Meters/Second. Adjust this to your specific robot gearing/safety needs.
   // 4.5 m/s is a standard fast speed for L2 gearing.
@@ -32,6 +38,7 @@ public class SwerveSubsystem extends SubsystemBase {
         throw new RuntimeException("CRITICAL: YAGSL Failed to load. Check JSON paths. \n" + e.getMessage());
       }
     }
+    SmartDashboard.putData("Field", m_field);
   }
 
   // Overloaded constructor for default path
@@ -57,6 +64,17 @@ public class SwerveSubsystem extends SubsystemBase {
     // ABSOLUTELY REQUIRED for the robot to know where it is.
     if (swerveDrive != null) {
       swerveDrive.updateOdometry();
+    }
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    // Update the Field2d object with the current robot pose during simulation
+    if (swerveDrive != null) {
+      m_field.setRobotPose(swerveDrive.getPose());
+    } else {
+      // In simulation without hardware, use a default pose
+      m_field.setRobotPose(new Pose2d());
     }
   }
   
