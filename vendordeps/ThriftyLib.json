@@ -1,20 +1,20 @@
 {
     "fileName": "ThriftyLib.json",
     "name": "ThriftyLib",
-    "version": "2025.1.1",
-    "frcYear": "2025",
+    "version": "2025.0.2",
+    "frcYear": 2025,
     "uuid": "60b2694b-9e6e-4026-81ee-6f167946f4b0",
     "mavenUrls": [
-        "https://docs.home.thethriftybot.com"
+        "https://thriftybot-software.s3.amazonaws.com/maven"
     ],
-    "jsonUrl": "https://docs.home.thethriftybot.com/ThriftyLib.json",
+    "jsonUrl": "https://thriftybot-software.s3.amazonaws.com/ThriftyLib.json",
+    "jniDependencies": [],
+    "cppDependencies": [],
     "javaDependencies": [
         {
-            "groupId": "com.thethriftybot.frc",
+            "groupId": "com.thethriftybot",
             "artifactId": "ThriftyLib-java",
-            "version": "2025.1.1"
+            "version": "2025.0.2"
         }
-    ],
-    "jniDependencies": [],
-    "cppDependencies": []
+    ]
 }
