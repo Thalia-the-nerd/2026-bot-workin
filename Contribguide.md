@@ -81,4 +81,4 @@ For detailed guidelines, refer to `styleguide.md` and `commitguide.md`.
 
 ## Need Help?
 
-If you have questions or need assistance, please reach out to the team or open an issue on GitHub.
+If you have questions or need assistance, please follow assist.md
