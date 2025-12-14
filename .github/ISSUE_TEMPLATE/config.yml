@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Team Discussion
+    url: https://github.com/MiamiBeachBots/2026-bot/discussions
+    about: General questions, ideas, or team discussions
+  - name: WPILib Documentation
+    url: https://docs.wpilib.org/
+    about: Official WPILib documentation and resources
+  - name: YAGSL Documentation
+    url: https://github.com/BroncBotz3481/YAGSL
+    about: Yet Another Generic Swerve Library documentation

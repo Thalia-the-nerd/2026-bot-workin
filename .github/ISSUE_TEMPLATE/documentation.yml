@@ -1,0 +1,90 @@
+name: Documentation Update
+description: Report missing, incorrect, or outdated documentation
+title: "[Docs] "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us improve the documentation! Report issues with READMEs, guides, Javadocs, or code comments.
+
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation needs updating?
+      options:
+        - README.md
+        - Style Guide (styleguide.md)
+        - Commit Guide (commitguide.md)
+        - Contributing Guide (Contribguide.md)
+        - Javadocs (code comments)
+        - Code comments
+        - Configuration files (YAGSL, etc.)
+        - Build / Deployment instructions
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: Issue Type
+      description: What's wrong with the documentation?
+      options:
+        - Missing documentation
+        - Incorrect / Outdated information
+        - Unclear / Confusing
+        - Typo / Grammar
+        - Formatting issue
+        - Missing examples
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: location
+    attributes:
+      label: Location
+      description: Where is the documentation issue located?
+      placeholder: |
+        File path and line numbers, or section name:
+        - README.md, lines 45-50
+        - styleguide.md, "Naming Conventions" section
+        - SwerveSubsystem.java, drive() method Javadoc
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Documentation
+      description: What does the current documentation say? (if applicable)
+      placeholder: Quote the current text or describe what's missing
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Change
+      description: What should the documentation say instead?
+      placeholder: Provide suggested text or describe what should be added
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Why is this change needed? Any supporting information?
+      placeholder: Explain the rationale or provide context
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please verify the following
+      options:
+        - label: I have checked that this documentation issue doesn't already exist
+          required: true
+        - label: My proposed change follows the repository's documentation style
+          required: false

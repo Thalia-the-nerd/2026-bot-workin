@@ -1,0 +1,142 @@
+name: Hardware Issue
+description: Report a hardware problem or electrical issue with the robot
+title: "[Hardware] "
+labels: ["hardware", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report hardware problems, electrical issues, or physical robot concerns.
+        
+        **⚠️ SAFETY FIRST:** If there is an immediate safety concern, notify team leadership immediately and power down the robot.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this hardware issue?
+      options:
+        - Critical (Safety hazard / Robot inoperable)
+        - High (Major component failure)
+        - Medium (Component degraded performance)
+        - Low (Minor issue / Preventive maintenance)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component Type
+      description: What type of hardware is affected?
+      options:
+        - Motor / Motor Controller
+        - Sensor (Gyro, Encoder, etc.)
+        - Pneumatics
+        - PDP / Power Distribution
+        - RoboRIO
+        - Swerve Module
+        - Radio / Networking
+        - Camera / Vision System
+        - Mechanical / Structural
+        - Wiring / Electrical
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: component_id
+    attributes:
+      label: Component ID / Location
+      description: CAN ID, physical location, or specific component identifier
+      placeholder: "e.g., CAN ID 5, Front Left Swerve Module, Left Intake Motor"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: robot
+    attributes:
+      label: Which Robot?
+      description: Which robot is experiencing this issue?
+      options:
+        - Competition Robot
+        - Practice Robot
+        - Both
+        - Unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: Describe the hardware problem in detail
+      placeholder: What is wrong with the hardware?
+    validations:
+      required: true
+
+  - type: textarea
+    id: symptoms
+    attributes:
+      label: Symptoms / Behavior
+      description: What symptoms or behaviors are you observing?
+      placeholder: |
+        - Motor not responding
+        - Unusual noises or vibrations
+        - LED status indicators
+        - Driver Station errors
+    validations:
+      required: true
+
+  - type: textarea
+    id: troubleshooting
+    attributes:
+      label: Troubleshooting Steps Taken
+      description: What have you already tried to diagnose or fix the issue?
+      placeholder: |
+        - Checked CAN connections
+        - Verified motor controller LED status
+        - Swapped with known-good component
+        - Reviewed Driver Station logs
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact on Robot Operation
+      description: How does this affect robot functionality?
+      placeholder: Can the robot still drive? Can we compete with this issue?
+
+  - type: input
+    id: occurred
+    attributes:
+      label: When Did This Occur?
+      description: When did you first notice this issue?
+      placeholder: "e.g., During practice 12/14, After Week 1 competition"
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Photos, videos, or other relevant information
+      placeholder: Include photos of damage, wiring, LED patterns, etc.
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety Verification
+      description: Confirm safety status
+      options:
+        - label: There is no immediate safety hazard (issue has been reviewed)
+          required: true
+        - label: Team leadership has been notified if this is a critical issue
+          required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please verify the following
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: I have documented component ID and location information
+          required: true
