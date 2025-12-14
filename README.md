@@ -96,6 +96,7 @@ Test the code without a physical robot:
 - **[Contributing Guide](Contribguide.md)** - How to contribute to this project
 - **[Style Guide](styleguide.md)** - Code formatting and naming conventions
 - **[Commit Guide](commitguide.md)** - Git commit message standards
+- **[Assist Guide](Assist.md)** - How to get help and report issues
 
 ## Development
 

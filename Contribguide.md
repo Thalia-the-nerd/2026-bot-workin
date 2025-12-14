@@ -81,4 +81,4 @@ For detailed guidelines, refer to `styleguide.md` and `commitguide.md`.
 
 ## Need Help?
 
-If you have questions or need assistance, please follow assist.md
+If you have questions or need assistance, please refer to the [Assist Guide](Assist.md).
