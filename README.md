@@ -162,7 +162,17 @@ Miami Beach, Florida
 
 ## Sponsors
 
-> **TODO:** Add sponsor information
+We are grateful for the generous support of our sponsors:
+
+- **Gene Haas Foundation**
+- **Waldom Electronics**
+- **Give Miami Day**
+- **Intuitive Foundation**
+- **MDCPS** (Miami-Dade County Public Schools)
+- **Cordyceps Systems**
+- **MBSH PTSA** (Miami Beach Senior High Parent-Teacher-Student Association)
+- **FIRST Robotics**
+- **Metal Supermarkets**
 
 ---
 
