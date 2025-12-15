@@ -106,4 +106,4 @@ This is two unrelated changes. Split them up.
 
 If the shooter code has bugs, you can revert it without losing the motor fix.
 
-"History is a set of lies agreed upon just like this commit history" — Napoleon Bonaparte
+"History is a set of lies agreed upon" — Napoleon Bonaparte
