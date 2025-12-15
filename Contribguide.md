@@ -4,12 +4,30 @@ Thank you for your interest in contributing to the 2026-bot project! This guide 
 
 ## Getting Started
 
-### Clone the Repository
+### Fork and Clone the Repository
 
-```bash
-git clone https://github.com/mbbots/2026-bot.git
-cd 2026-bot
-```
+**Important:** Do not commit directly to the main repository. Instead, fork the repository and work on your fork.
+
+1. **Fork the repository** by clicking the "Fork" button at the top of the [2026-bot repository](https://github.com/MiamiBeachBots/2026-bot) page on GitHub.
+
+2. **Clone your fork** (replace `YOUR_USERNAME` with your GitHub username):
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/2026-bot.git
+   cd 2026-bot
+   ```
+
+3. **Add the upstream repository** to keep your fork in sync:
+   ```bash
+   git remote add upstream https://github.com/MiamiBeachBots/2026-bot.git
+   ```
+
+4. **Verify your remotes:**
+   ```bash
+   git remote -v
+   ```
+   You should see:
+   - `origin` pointing to your fork
+   - `upstream` pointing to the main repository
 
 ### Install Dependencies
 
@@ -34,6 +52,17 @@ This project uses YAGSL for swerve drive control. Run the following command to d
 3. Use `./gradlew deploy` to deploy code to the robot.
 
 ## Contributing Workflow
+
+### Syncing Your Fork
+
+Before starting new work, always sync your fork with the upstream repository:
+
+```bash
+git checkout main
+git fetch upstream
+git merge upstream/main
+git push origin main
+```
 
 ### Creating a Branch
 
@@ -62,13 +91,17 @@ git commit -m "[Fix] Correct inverted motor direction"
 
 ### Opening a Pull Request
 
-1. Push your branch to the remote repository:
+1. Push your branch to **your fork** (not the main repository):
    ```bash
    git push origin feat/shooter-control
    ```
-2. Open a Pull Request on GitHub.
-3. Provide a clear description of your changes.
-4. Wait for code review and address any feedback.
+2. Go to the [main 2026-bot repository](https://github.com/MiamiBeachBots/2026-bot) on GitHub.
+3. You should see a prompt to "Compare & pull request" for your recently pushed branch.
+4. Click the button and create a Pull Request from your fork to the main repository.
+5. Provide a clear description of your changes.
+6. Wait for code review and address any feedback.
+
+**Note:** Never push directly to the main repository. All contributions must go through Pull Requests from your fork.
 
 ## Code Standards
 

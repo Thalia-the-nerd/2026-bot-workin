@@ -26,9 +26,13 @@ Ensure you have the following installed before setting up the project:
 
 ### Installation
 
-1. **Clone the repository:**
+1. **Fork and clone the repository:**
+   
+   First, fork the repository on GitHub by clicking the "Fork" button at [https://github.com/MiamiBeachBots/2026-bot](https://github.com/MiamiBeachBots/2026-bot).
+   
+   Then clone your fork (replace `YOUR_USERNAME` with your GitHub username):
    ```bash
-   git clone https://github.com/MiamiBeachBots/2026-bot.git
+   git clone https://github.com/YOUR_USERNAME/2026-bot.git
    cd 2026-bot
    ```
 
@@ -154,6 +158,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Contributing
 
 We welcome contributions! Please read our [Contributing Guide](Contribguide.md) and [Style Guide](styleguide.md) before submitting pull requests.
+
+**Important:** All contributions must be made through pull requests from your fork. Do not commit directly to the main repository.
 
 ## Team
 
