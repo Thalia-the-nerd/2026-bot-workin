@@ -162,7 +162,7 @@ Miami Beach, Florida
 
 ## Sponsors
 
-TODO
+> **TODO:** Add sponsor information
 
 ---
 
