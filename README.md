@@ -160,6 +160,10 @@ We welcome contributions! Please read our [Contributing Guide](Contribguide.md) 
 **Miami Beach Bots** - FRC Team 2026  
 Miami Beach, Florida
 
+## Sponsors
+
+TODO
+
 ---
 
 *Built by Miami Beach Bots*
