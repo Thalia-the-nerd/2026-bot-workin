@@ -59,11 +59,11 @@ public class TankSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
   }
-
+//I think i like index too much the videos are just so cool and the fighter jets are so epic
   @Override
   public void simulationPeriodic() {
     // FUCK physics
-    m_driveSim.setInputs(leftFront.getAppliedOutput() * 12, rightFront.getAppliedOutput() * 12);
+    m_driveSim.setInputs(leftFront.get() * 12, rightFront.get() * 12);
     m_driveSim.update(0.02);
 
     m_field.setRobotPose(m_driveSim.getPose());
