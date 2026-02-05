@@ -46,14 +46,14 @@ public class TankSubsystem extends SubsystemBase {
   }
 
   // Simulation stuff
-  private final edu.wpi.first.math.numbers.N2 m_chars = edu.wpi.first.math.VecBuilder.fill(1.5, 3); // linear, angular
   private final edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim m_driveSim = new edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim(
       edu.wpi.first.math.system.plant.DCMotor.getNEO(2),       // 2 NEOs per side
       7.29,                                                    // 7.29:1 gearing
-      7.5,                                                     // 7.5 kg mass (approx)
-      edu.wpi.first.math.util.Units.inchesToMeters(2),         // 2" radius wheels (approx)
+      7.5,                                                     // 7.5 kg mass related (J)
+      60.0,                                                    // Mass
+      edu.wpi.first.math.util.Units.inchesToMeters(2),         // 2" radius wheels
       edu.wpi.first.math.util.Units.inchesToMeters(20),        // track width
-      m_chars
+      null                                                     // Measurement noise
   );
 
   @Override
