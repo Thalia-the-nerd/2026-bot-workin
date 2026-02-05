@@ -75,3 +75,7 @@ __pycache__/
 env/
 venv/
 #The AI TOLD ME TO PUT PYTHON
+
+# Agentic Memory
+.gemini/
+.agent/
