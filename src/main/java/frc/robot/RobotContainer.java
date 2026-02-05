@@ -33,5 +33,6 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return Commands.print("No Auto Configured Yet!");
+    // YOU ARE THE ROBOT https://www.youtube.com/watch?v=MukNroQmaNA 
   }
 }

@@ -7,9 +7,12 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class TankSubsystem extends SubsystemBase {
+
+  private final Field2d m_field = new Field2d();
 
   private final SparkMax leftFront = new SparkMax(1, MotorType.kBrushless);
   private final SparkMax leftRear = new SparkMax(2, MotorType.kBrushless);
