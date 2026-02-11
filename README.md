@@ -2,7 +2,7 @@
 
 # *Aut viam inveniam aut faciam.*
 
-**Team:** Miami Beach Bots (FRC Team 2026)  
+**Team:** Miami Beach Bots (FRC Team 2026)
 **Season:** 2025-2026
 
 ## Project Status
@@ -27,9 +27,9 @@ Ensure you have the following installed before setting up the project:
 ### Installation
 
 1. **Fork and clone the repository:**
-   
+
    First, fork the repository on GitHub by clicking the "Fork" button at [https://github.com/MiamiBeachBots/2026-bot](https://github.com/MiamiBeachBots/2026-bot).
-   
+
    Then clone your fork (replace `YOUR_USERNAME` with your GitHub username):
    ```bash
    git clone https://github.com/YOUR_USERNAME/2026-bot.git
@@ -163,7 +163,7 @@ We welcome contributions! Please read our [Contributing Guide](Contribguide.md) 
 
 ## Team
 
-**Miami Beach Bots** - FRC Team 2026  
+**Miami Beach Bots** - FRC Team 2026
 Miami Beach, Florida
 
 ## Sponsors

@@ -10,15 +10,15 @@ GitHub Issues is our primary method for tracking bugs, feature requests, and gen
 
 If you've encountered a bug, crash, compilation error, or unexpected behavior in the code:
 
-1. **Navigate to the Issues tab:**  
+1. **Navigate to the Issues tab:**
    Go to [https://github.com/MiamiBeachBots/2026-bot/issues](https://github.com/MiamiBeachBots/2026-bot/issues)
 
-2. **Check for existing issues:**  
+2. **Check for existing issues:**
    Before creating a new issue, search to see if someone has already reported the same problem.
 
 3. **Click "New Issue"** and provide the following information:
 
-   - **Title:** A clear, concise summary of the problem  
+   - **Title:** A clear, concise summary of the problem
      Example: `[Bug] Swerve module fails to initialize on boot`
 
    - **Description:** Include detailed information:
@@ -38,7 +38,7 @@ If you've encountered a bug, crash, compilation error, or unexpected behavior in
 Title: [Bug] Robot code crashes on startup with NullPointerException
 
 Description:
-When deploying the robot code to the RoboRIO, the code crashes immediately 
+When deploying the robot code to the RoboRIO, the code crashes immediately
 after initialization with a NullPointerException in SwerveSubsystem.java.
 
 Steps to Reproduce:
@@ -66,12 +66,12 @@ Environment:
 
 For non-code-related matters such as documentation improvements, feature requests, organizational questions, or general discussions:
 
-1. **Navigate to the Issues tab:**  
+1. **Navigate to the Issues tab:**
    Go to [https://github.com/MiamiBeachBots/2026-bot/issues](https://github.com/MiamiBeachBots/2026-bot/issues)
 
 2. **Click "New Issue"** and provide:
 
-   - **Title:** A descriptive summary  
+   - **Title:** A descriptive summary
      Examples:
      - `[Docs] Add CAN bus wiring diagram to README`
      - `[Feature Request] Implement auto-balancing routine`
@@ -89,8 +89,8 @@ For non-code-related matters such as documentation improvements, feature request
 Title: [Docs] Add instructions for calibrating swerve module offsets
 
 Description:
-The current documentation doesn't explain how to calibrate the swerve module 
-absolute encoder offsets. This would be helpful for new team members working 
+The current documentation doesn't explain how to calibrate the swerve module
+absolute encoder offsets. This would be helpful for new team members working
 on the drive system.
 
 Suggested Content:
@@ -105,7 +105,7 @@ This would fit well in the README under the "Hardware Integration" section.
 
 For urgent matters, private concerns, or questions that don't fit GitHub Issues, you can reach out directly to:
 
-**Thalia**  
+**Thalia**
 📧 Email: [thaliathenerd@proton.me](mailto:thaliathenerd@proton.me)
 
 Please use direct contact sparingly and prefer GitHub Issues for transparency and team visibility.
