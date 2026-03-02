@@ -172,8 +172,25 @@ Test the code without a physical robot:
 
 ## CAN Bus Map
 
-> [!IMPORTANT]
-> The hardware wiring and CAN maps have not yet been completed. Update this table once electrical integration is finished!
+> [!NOTE]
+> The hardware wiring and CAN maps have now been completed! The full CAN map is listed below. All motors are REV Spark Maxes.
+
+| CAN ID | Subsystem | Device/Motor Name | Type |
+|:---|:---|:---|:---|
+| 1  | DriveTrain | Front Right Motor | NEO Brushless |
+| 2  | DriveTrain | Back Right Motor | NEO Brushless |
+| 3  | DriveTrain | Front Left Motor | NEO Brushless |
+| 4  | DriveTrain | Back Left Motor | NEO Brushless |
+| 5  | Elevator | Left Elevator Motor | NEO Brushless |
+| 6  | Elevator | Right Elevator Motor | NEO Brushless |
+| 7  | Arm | Main Pivot Arm Motor | NEO Brushless |
+| 8  | Shooter | Left Flywheel | NEO Brushless |
+| 9  | Shooter | Right Flywheel | NEO Brushless |
+| 10 | Lifter | Left Climber | NEO Brushless |
+| 11 | Lifter | Right Climber | NEO Brushless |
+| 12 | Turret | Turret Rotation Motor | NEO 550 |
+| 13 | FireControl | Fire Kicker Motor | NEO 550 |
+| 14 | Intake | Intake Roller Motor | NEO 550 |
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
 
@@ -197,13 +214,13 @@ Test the code without a physical robot:
 * [x] **Vision & Coprocessor**
   * [x] Set up vision processing (Limelight/PhotonVision)
   * [x] Implement AprilTag tracking algorithms
-* [ ] **Driver Station**
-  * [ ] Configure primary controller mappings
+* [x] **Driver Station**
+  * [x] Configure primary controller mappings
   * [x] Configure secondary operator mappings
   * [x] Set up SmartDashboard feedback telemetry
 * [ ] **Documentation**
   * [x] Finalize `README.md` structure and badges
-  * [ ] Complete CAN bus map
+  * [x] Complete CAN bus map
   * [ ] Document electrical connections and wire routing
   * [ ] Add subsystem and command JavaDoc documentation
 
