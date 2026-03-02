@@ -150,8 +150,13 @@ public class RobotContainer {
             () -> m_turretSubsystem.setTurretSpeed(m_flightstick.getX()), m_turretSubsystem));
 
     // Fire Control Command (Bind to Trigger / Button 1 of flight stick)
-    m_operatorDefaultButton.onTrue(
-        new FireCommand(m_fireSubsystem, () -> m_flightstick.getY(), m_operatorDefaultButton));
+    // Run at full speed (1.0) while trigger is held, rather than mapped to Y axis.
+    m_operatorDefaultButton.whileTrue(
+        new FireCommand(m_fireSubsystem, () -> 1.0, m_operatorDefaultButton));
+        
+    // Shooter / Flywheel (Bind to Y-axis of flight stick so pushing forward spins up the shooter)
+    m_shooterSubsytem.setDefaultCommand(
+        new RunCommand(() -> m_shooterSubsytem.SpinShooter(m_flightstick.getY()), m_shooterSubsytem));
 
     // Auto Aim Command (Bind to Button 2 of flight stick to toggle)
     m_operatorButton2.toggleOnTrue(new AutoAimCommand(m_turretSubsystem, m_cameraSubsystem));
