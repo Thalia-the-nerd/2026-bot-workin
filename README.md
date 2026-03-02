@@ -183,9 +183,13 @@ Test the code without a physical robot:
 | 2  | DriveTrain | Back Right Motor | NEO Brushless |
 | 3  | DriveTrain | Front Left Motor | NEO Brushless |
 | 4  | DriveTrain | Back Left Motor | NEO Brushless |
-| 12 | Turret | Turret Rotation Motor | NEO 550 |
-| 13 | FireControl | Fire Kicker Motor | NEO 550 |
-| 14 | Intake | Intake Roller Motor | NEO 550 |
+| 5  | Intake | Intake Main Motor | NEO Brushless |
+| 6  | Intake | Intake Secondary Motor | NEO Brushless |
+| 7  | Loader | Loader Loader Motor 1 | NEO Brushless |
+| 8  | Loader | Loader Loader Motor 2 | NEO Brushless |
+| 9  | Loader | Loader Loader Motor 3 | NEO Brushless |
+| 10 | Turret | Turret Rotation Motor | NEO 550 |
+| 11 | FireControl | Fire Kicker Motor | NEO 550 |
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
 

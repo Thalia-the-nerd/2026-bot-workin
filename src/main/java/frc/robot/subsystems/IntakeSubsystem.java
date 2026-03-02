@@ -11,18 +11,26 @@ import frc.robot.Constants.CANConstants;
 /** Subsystem handling the intake/loading system. */
 public class IntakeSubsystem extends SubsystemBase {
 
-  private final SparkMax m_intakeMotor;
+  private final SparkMax m_intakeMotorMain;
+  private final SparkMax m_intakeMotorSecondary;
   private final SparkMaxConfig m_config;
 
   public IntakeSubsystem() {
-    m_intakeMotor = new SparkMax(CANConstants.MOTOR_INTAKE_ID, MotorType.kBrushless);
+    m_intakeMotorMain = new SparkMax(CANConstants.MOTOR_INTAKE_MAIN_ID, MotorType.kBrushless);
+    m_intakeMotorSecondary =
+        new SparkMax(CANConstants.MOTOR_INTAKE_SECONDARY_ID, MotorType.kBrushless);
     m_config = new SparkMaxConfig();
 
     // Default to Coast mode or Brake mode depending on team preference.
     // Usually intakes run in Coast so balls/notes aren't crushed on stop.
     m_config.idleMode(SparkMaxConfig.IdleMode.kCoast);
 
-    m_intakeMotor.configure(
+    m_intakeMotorMain.configure(
+        m_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    // Apply config to secondary motor and follow main motor
+    m_config.follow(m_intakeMotorMain);
+    m_intakeMotorSecondary.configure(
         m_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -32,12 +40,12 @@ public class IntakeSubsystem extends SubsystemBase {
    * @param speed Speed from -1.0 to 1.0. positive spins intake inward.
    */
   public void setIntakeSpeed(double speed) {
-    m_intakeMotor.set(speed);
+    m_intakeMotorMain.set(speed);
   }
 
   /** Stops the intake. */
   public void stop() {
-    m_intakeMotor.stopMotor();
+    m_intakeMotorMain.stopMotor();
   }
 
   @Override

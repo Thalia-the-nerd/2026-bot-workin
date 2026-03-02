@@ -23,6 +23,7 @@ import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.FireControlSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LoaderSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -46,6 +47,7 @@ public class RobotContainer {
   private final TurretSubsystem m_turretSubsystem = new TurretSubsystem();
   private final FireControlSubsystem m_fireSubsystem = new FireControlSubsystem();
   private final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
+  private final LoaderSubsystem m_loaderSubsystem = new LoaderSubsystem();
 
   // Initialize Commands
   private final DefaultDrive m_defaultDrive =
@@ -145,6 +147,11 @@ public class RobotContainer {
     m_turretSubsystem.setDefaultCommand(
         new RunCommand(
             () -> m_turretSubsystem.setTurretSpeed(m_flightstick.getX()), m_turretSubsystem));
+
+    // Loader Default Command (Bind to Y-axis of flight stick)
+    m_loaderSubsystem.setDefaultCommand(
+        new RunCommand(
+            () -> m_loaderSubsystem.setLoaderSpeed(m_flightstick.getY()), m_loaderSubsystem));
 
     // Fire Control Command (Bind to Trigger / Button 1 of flight stick)
     // Run at full speed (1.0) while trigger is held, rather than mapped to Y axis.

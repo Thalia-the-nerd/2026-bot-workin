@@ -20,8 +20,8 @@ This document serves as the master reference for all controller mappings and dri
 | Input | Action | Description |
 |:---|:---|:---|
 | **X-Axis** | Turret Manual Control | Manually rotates the Turret left and right. |
-| **Y-Axis** | *Unassigned* | Reserved for future mechanisms. |
-| **Throttle Slider** | Intake Speed | Automatically scales the intake motor speed. |
+| **Y-Axis** | Loader Speed | Pushing stick forward spins the 3-motor Loader inward. |
+| **Throttle Slider** | Intake Speed | Automatically scales the 2-motor Intake speed. |
 | **Trigger (Top)** | Fire Weapon | Activates feeder/kicker motor full speed to launch the ball. |
 | **Button 2** | Toggle Auto Aim | Activates auto-aim mode for targeting. |
 | **Buttons 6-11** | Turret Presets | Rotates the turret to predefined angular positions. |

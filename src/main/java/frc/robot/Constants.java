@@ -23,12 +23,18 @@ public final class Constants {
     public static final int MOTOR_FRONT_LEFT_ID = 3;
     public static final int MOTOR_BACK_LEFT_ID = 4;
 
-    /// Turret and Fire Subsystems
-    public static final int MOTOR_TURRET_ID = 12;
-    public static final int MOTOR_FIRE_ID = 13;
-
     /// Intake Subsystem
-    public static final int MOTOR_INTAKE_ID = 14;
+    public static final int MOTOR_INTAKE_MAIN_ID = 5;
+    public static final int MOTOR_INTAKE_SECONDARY_ID = 6;
+
+    /// Loader Subsystem
+    public static final int MOTOR_LOADER_1_ID = 7;
+    public static final int MOTOR_LOADER_2_ID = 8;
+    public static final int MOTOR_LOADER_3_ID = 9;
+
+    /// Turret and Fire Subsystems
+    public static final int MOTOR_TURRET_ID = 10;
+    public static final int MOTOR_FIRE_ID = 11;
   }
 
   // Is simulation
