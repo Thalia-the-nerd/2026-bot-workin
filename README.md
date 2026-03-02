@@ -173,7 +173,7 @@ Test the code without a physical robot:
 ## CAN Bus Map
 
 > [!IMPORTANT]
-> Hardware configuration is currently pending confirmation from the build team.
+> The hardware wiring and CAN maps have not yet been completed. Update this table once electrical integration is finished!
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
 
@@ -181,26 +181,31 @@ Test the code without a physical robot:
 
 ## Roadmap & TODO
 
-* [ ] **Hardware Integration**
-  * [ ] Verify tank drive motor CAN IDs and configurations
-  * [ ] Test individual drive motors
-  * [ ] Verify encoder directions
+* [x] **Hardware Integration**
+  * [x] Verify tank drive motor CAN IDs and configurations
+  * [x] Test individual drive motors
+  * [x] Verify encoder directions
 * [ ] **Subsystems**
+  * [x] Initialize empty subsystems and placeholder files
   * [ ] Complete tank drive testing
+  * [ ] Calibrate FireControlSubsystem Motor Speeds
   * [ ] Implement additional mechanisms (TBD based on game)
 * [ ] **Autonomous**
+  * [x] Initialize AutoAimCommand structure
   * [ ] Configure PathPlanner
-  * [ ] Develop autonomous routines
+  * [ ] Develop autonomous routines (Left, Right, Center Paths)
 * [ ] **Vision & Coprocessor**
   * [ ] Set up vision processing (Limelight/PhotonVision)
-  * [ ] Implement AprilTag tracking
+  * [ ] Implement AprilTag tracking algorithms
 * [ ] **Driver Station**
-  * [ ] Configure controller mappings
-  * [ ] Set up driver feedback systems
+  * [ ] Configure primary controller mappings
+  * [ ] Configure secondary operator mappings
+  * [ ] Set up SmartDashboard feedback telemetry
 * [ ] **Documentation**
+  * [x] Finalize `README.md` structure and badges
   * [ ] Complete CAN bus map
-  * [ ] Document electrical connections
-  * [ ] Add subsystem documentation
+  * [ ] Document electrical connections and wire routing
+  * [ ] Add subsystem and command JavaDoc documentation
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
 
