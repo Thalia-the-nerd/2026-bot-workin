@@ -15,23 +15,28 @@ public class DefaultDrive extends Command {
   private final ShooterState m_shooterState;
   private final DoubleSupplier m_left_y; // this gives us the left y axis for current controller
   private final DoubleSupplier m_right_y; // this gives us the right y axis for current controller
+  private final java.util.function.BooleanSupplier m_precision_mode; // Precision Mode Toggle
 
   /**
    * Creates a new DefaultDrive command.
    *
    * @param d_subsystem The drive subsystem used by this command.
+   * @param shooterState The shooter state for queued modes
    * @param xbox_left_y A function that returns the value of the left y axis for the joystick.
    * @param xbox_right_y A function that returns the value of the right Y axis for the joystick.
+   * @param precision_mode A function returning true if precision mode should be active.
    */
   public DefaultDrive(
       DriveSubsystem d_subsystem,
       ShooterState shooterState,
       DoubleSupplier xbox_left_y,
-      DoubleSupplier xbox_right_y) {
+      DoubleSupplier xbox_right_y,
+      java.util.function.BooleanSupplier precision_mode) {
     m_driveSubsystem = d_subsystem;
     m_shooterState = shooterState;
     m_left_y = xbox_left_y;
     m_right_y = xbox_right_y;
+    m_precision_mode = precision_mode;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(d_subsystem);
   }
@@ -44,13 +49,18 @@ public class DefaultDrive extends Command {
   @Override
   public void execute() {
     // we include a limit on the drivers speed for safety.
-    // Additonally the axis's on the
     m_driveSubsystem.setReducedSpeed(false);
     if (!HelperFunctions.inDeadzone(m_left_y.getAsDouble(), Constants.CONTROLLER_DEAD_ZONE)
         || !HelperFunctions.inDeadzone(m_right_y.getAsDouble(), Constants.CONTROLLER_DEAD_ZONE)) {
+      
+      double speedMultiplier = m_precision_mode.getAsBoolean() ? 0.3 : 1.0;
+      
       this.m_driveSubsystem.tankDrive(
-          Constants.MAX_SPEED * m_left_y.getAsDouble(),
-          Constants.MAX_SPEED * m_right_y.getAsDouble());
+          Constants.MAX_SPEED * m_left_y.getAsDouble() * speedMultiplier,
+          Constants.MAX_SPEED * m_right_y.getAsDouble() * speedMultiplier);
+    } else {
+        // Must explicitly stop if within deadzone or else motors will coast at last value
+        this.m_driveSubsystem.tankDrive(0, 0);
     }
   }
 

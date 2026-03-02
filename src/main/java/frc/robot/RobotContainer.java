@@ -56,7 +56,7 @@ public class RobotContainer {
   // Initialize Commands
   private final DefaultDrive m_defaultDrive =
       new DefaultDrive(
-          m_driveSubsystem, m_shooterState, this::getControllerLeftY, this::getControllerRightY);
+          m_driveSubsystem, m_shooterState, this::getControllerLeftY, this::getControllerRightY, () -> m_controller1.getHID().getLeftBumper());
   private final AimCommand m_aimCommand =
       new AimCommand(m_driveSubsystem, m_cameraSubsystem, m_shooterState);
   private final FlywheelCommand m_shooterCommand =
@@ -65,7 +65,7 @@ public class RobotContainer {
   // Init controller buttons
   private Trigger m_toggleBrakeButton;
   private Trigger m_switchQueuedButton;
-  private Trigger m_driverDefaultButton;
+  private Trigger m_toggleIntakeButton;
   // Init joystick buttons
   private JoystickButton m_operatorDefaultButton;
   private JoystickButton m_operatorButton2;
@@ -109,9 +109,9 @@ public class RobotContainer {
 
   private void setupTriggers() {
     // Controller Buttons
-    m_toggleBrakeButton = m_controller1.b();
+    m_toggleBrakeButton = m_controller1.rightBumper();
     m_switchQueuedButton = m_controller1.y();
-    m_driverDefaultButton = m_controller1.a();
+    m_toggleIntakeButton = m_controller1.a();
 
     // Joystick Buttons
     m_operatorDefaultButton =
@@ -129,7 +129,17 @@ public class RobotContainer {
   private void bindCommands() {
     // Controller Bindings
     m_switchQueuedButton.whileTrue(new InstantCommand(() -> m_shooterState.switchModes()));
-    m_driverDefaultButton.whileTrue(new InstantCommand(() -> m_shooterState.defaultOverride()));
+    m_toggleBrakeButton.onTrue(new InstantCommand(() -> m_driveSubsystem.SwitchBrakemode()));
+    
+    // Intake
+    m_toggleIntakeButton.toggleOnTrue(new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(1.0), m_intakeSubsystem));
+    m_controller1.leftTrigger().whileTrue(new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(-1.0), m_intakeSubsystem));
+    
+    // Fire Override
+    m_controller1.rightTrigger().whileTrue(new RunCommand(() -> m_fireSubsystem.fire(1.0), m_fireSubsystem));
+    
+    // Default Drive
+    m_driveSubsystem.setDefaultCommand(m_defaultDrive);
     // Joystick Bindings
     m_operatorDefaultButton.whileTrue(
         new InstantCommand(() -> m_shooterState.setQueuedMode(ShooterModes.DEFAULT)));
