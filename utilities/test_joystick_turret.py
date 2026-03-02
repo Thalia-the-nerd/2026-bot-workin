@@ -40,15 +40,15 @@ CUSTOM_LABELS = {
     "axis_1": "Fire Motor Speed (Y)",
     "axis_2": "Intake Speed Slider (Throttle)",
     "axis_3": "Intake Speed Slider (Throttle)",
-    "btn_0": "Fire Trigger",
-    "btn_1": "AutoAim Toggle",
-    "btn_5": "Preset 1",
-    "btn_6": "Preset 2",
-    "btn_7": "Preset 3",
-    "btn_8": "Preset 4",
-    "btn_9": "Preset 5",
-    "btn_10": "Preset 6",
-    "btn_11": "Intake Unjam (2sec)"
+    "btn_0": "1: Fire Trigger",
+    "btn_1": "2: AutoAim Toggle",
+    "btn_5": "6: Preset -180",
+    "btn_6": "7: Preset -90",
+    "btn_7": "8: Preset 0",
+    "btn_8": "9: Preset 90",
+    "btn_9": "10: Preset 180",
+    "btn_10": "11: Preset 270",
+    "btn_11": "12: Intake Unjam"
 }
 
 while running:
@@ -112,8 +112,8 @@ while running:
         btns_text = "   "
         for b in range(joy.get_numbuttons()):
             val = joy.get_button(b)
-            # Fetch custom zero-based label
-            label = CUSTOM_LABELS.get(f"btn_{b}", str(b))
+            # Fetch custom zero-based label, default to Pygame + 1 so "btn_0" reads "Button 1"
+            label = CUSTOM_LABELS.get(f"btn_{b}", f"Button {b+1}")
             
             if val:
                 btns_text += f"[{label}] "
