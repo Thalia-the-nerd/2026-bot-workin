@@ -175,7 +175,6 @@ public class RobotContainer {
 
     // Emergency Unjam (Button 12)
     m_operatorButton12.onTrue(new UnjamIntakeCommand(m_intakeSubsystem));
-
   }
 
   private void initializeAutonomous() {

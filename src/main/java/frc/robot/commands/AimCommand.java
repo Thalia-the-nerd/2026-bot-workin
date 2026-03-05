@@ -12,156 +12,107 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.CameraConstants;
 import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-/** The Aim command that uses the camera + gyro to control the robot. */
-public class AimCommand extends Command {
-  private final DriveSubsystem m_driveSubsystem;
-  private final CameraSubsystem m_cameraSubsystem;
-  private final Transform3d camOffset;
-  private final Transform3d targetingOffset;
+/** The Aim command that uses the camera to generate a path to the target. */
+public class AimCommand extends SequentialCommandGroup {
 
   // Generated using Vernier Graphical Analysis
-  private final double distancePowerA = 9.847;
-  private final double distancePowerB = -0.6214;
-
-  private Command resultingCommand;
+  private static final double distancePowerA = 9.847;
+  private static final double distancePowerB = -0.6214;
 
   /**
    * Creates a new AimCommand.
    *
-   * @param d_subsystem The drive subsystem used by this command.
+   * @param d_subsystem The drive subsystem to use.
+   * @param c_subsystem The camera subsystem to use.
    */
-  // TODO: Change from reefscape to current game
   public AimCommand(DriveSubsystem d_subsystem, CameraSubsystem c_subsystem) {
-    m_driveSubsystem = d_subsystem;
-    m_cameraSubsystem = c_subsystem;
-
-    // Change this to match the name of your camera
-
-    // Use addRequirements() here to declare subsystem dependencies.
+    // Add requirements for the entire sequence (it will occupy the drivetrain)
     addRequirements(d_subsystem, c_subsystem);
 
-    // The first offset takes the camera location and converts to center of robot
-    camOffset = CameraConstants.TARGETING_CAMERA1.LOCATION;
+    Transform3d camOffset = CameraConstants.TARGETING_CAMERA1.LOCATION;
     // this offset takes the center of robot and tells it to move back so that we dont just run over
-    // the ballW
-    targetingOffset = camOffset.plus(new Transform3d());
-  }
+    // the target
+    Transform3d targetingOffset = camOffset.plus(new Transform3d());
 
-  // Called when the command is initially schedule
-  @Override
-  public void initialize() {
-    resultingCommand = null;
-  }
+    addCommands(
+        // Step 1: Wait until we see a target
+        Commands.waitUntil(
+            () -> {
+              Optional<PhotonPipelineResult> result = c_subsystem.targetingCamera1Result;
+              if (result.isPresent() && result.get().hasTargets()) {
+                return true;
+              }
+              SmartDashboard.putBoolean("CameraTargetDetected", false);
+              SmartDashboard.putNumber("CameraTargetPitch", 0.0);
+              return false;
+            }),
+        // Step 2: Once the target is seen, defer the PathPlanner command generation until this step
+        // runs
+        new DeferredCommand(
+            () -> {
+              Optional<PhotonPipelineResult> resultOpt = c_subsystem.targetingCamera1Result;
+              if (resultOpt.isEmpty() || !resultOpt.get().hasTargets()) {
+                return Commands.none();
+              }
 
-  /**
-   * Takes pipeline result from camera, follows path based on those results.
-   *
-   * @param result Camera pipeline result
-   */
-  private void processResult(PhotonPipelineResult result) {
-    SmartDashboard.putBoolean("CameraTargetDetected", true);
-    // find target we want, we can change later
-    PhotonTrackedTarget target = result.getBestTarget();
-    Transform3d cameraToTarget = distanceToTarget(target);
+              PhotonPipelineResult result = resultOpt.get();
+              SmartDashboard.putBoolean("CameraTargetDetected", true);
+              PhotonTrackedTarget target = result.getBestTarget();
 
-    Logger.recordOutput("AimCamToTargetTransform", cameraToTarget);
+              double detectedArea = target.area;
+              double distance = distancePowerA * Math.pow(detectedArea, distancePowerB);
+              Logger.recordOutput("BallDistance", distance);
 
-    // Now take target transform and apply to target coords
-    // This essentially makes them relative to robot pose, then relative to intake
-    Transform3d targetOffset = cameraToTarget.plus(targetingOffset);
+              double yaw = Units.degreesToRadians(target.getYaw());
+              double distance_x = distance * Math.cos(yaw);
+              double distance_y = distance * Math.sin(yaw);
+              Transform3d cameraToTarget =
+                  new Transform3d(
+                      new Translation3d(distance_x, distance_y, 0), new Rotation3d(0, 0, yaw));
 
-    Logger.recordOutput("AimTargetRelRobotPose", targetOffset);
+              Logger.recordOutput("AimCamToTargetTransform", cameraToTarget);
 
-    // get the pose of the robot
-    Pose3d robotPose = new Pose3d(m_driveSubsystem.getPose());
+              Transform3d targetOffset = cameraToTarget.plus(targetingOffset);
+              Logger.recordOutput("AimTargetRelRobotPose", targetOffset);
 
-    // add the offset to the robot pose (now relative to field)
-    Pose3d robotToTarget = robotPose.plus(targetOffset);
+              Pose3d robotPose = new Pose3d(d_subsystem.getPose());
+              Pose3d robotToTarget = robotPose.plus(targetOffset);
+              Logger.recordOutput("AimNavRelPose", robotToTarget);
 
-    // Log ball pose
-    Logger.recordOutput("AimNavRelPose", robotToTarget);
+              Pose2d newTargetPose = robotToTarget.toPose2d();
+              Logger.recordOutput("AimNav2dPose", newTargetPose);
 
-    // convert to a pose2d for the drive subsystem
-    Pose2d newTargetPose = robotToTarget.toPose2d();
+              Rotation2d newRotation = new Rotation2d(newTargetPose.getRotation().getDegrees());
 
-    Logger.recordOutput("AimNav2dPose", newTargetPose);
+              List<Pose2d> targetPoses = new ArrayList<>();
+              targetPoses.add(
+                  new Pose2d(
+                      robotPose.getTranslation().getX(),
+                      robotPose.getTranslation().getY(),
+                      newRotation));
+              targetPoses.add(
+                  new Pose2d(
+                      newTargetPose.getTranslation().getX(),
+                      newTargetPose.getTranslation().getY(),
+                      newRotation));
 
-    // calculate rotation
-    Rotation2d newRotation = new Rotation2d(newTargetPose.getRotation().getDegrees());
-
-    // check if new pose within tolerance
-    // Create list of target poses
-    // One at halfway to target, one at the target
-    List<Pose2d> targetPoses = new ArrayList<Pose2d>();
-    targetPoses.add(
-        new Pose2d(
-            robotPose.getTranslation().getX(), robotPose.getTranslation().getY(), newRotation));
-    targetPoses.add(
-        new Pose2d(
-            newTargetPose.getTranslation().getX(),
-            newTargetPose.getTranslation().getY(),
-            newRotation));
-
-    // update the drive subsystem
-    m_driveSubsystem.setReducedSpeed(false);
-    resultingCommand = m_driveSubsystem.GenerateOnTheFlyCommand(targetPoses);
-    resultingCommand.initialize();
-  }
-
-  // Finds the distance from the camera to a target
-  private Transform3d distanceToTarget(PhotonTrackedTarget target) {
-    double detectedArea = target.area; // X for the power func
-    double distance = distancePowerA * Math.pow(detectedArea, distancePowerB);
-    Logger.recordOutput("BallDistance", distance);
-    double yaw = Units.degreesToRadians(target.getYaw()); // rel x axis
-    double distance_x = distance * Math.cos(yaw);
-    double distance_y = distance * Math.sin(yaw);
-    return new Transform3d(new Translation3d(distance_x, distance_y, 0), new Rotation3d(0, 0, yaw));
-  }
-
-  // Called every time the cheduler runs while the command is scheduled.
-  @Override
-  public void execute() {
-    if (resultingCommand != null) {
-      resultingCommand.execute();
-    } else {
-      Optional<PhotonPipelineResult> CamResult = m_cameraSubsystem.targetingCamera1Result;
-      // will not work if cam is defined incorrectly, but will not tell you
-      CamResult.ifPresentOrElse(
-          result -> {
-            if (result.hasTargets()) {
-              processResult(result);
-            }
-          },
-          () -> {
-            SmartDashboard.putBoolean("CameraTargetDetected", false);
-            SmartDashboard.putNumber("CameraTargetPitch", 0.0);
-          });
-    }
-  }
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {
-    if (resultingCommand != null) {
-      resultingCommand.end(interrupted);
-    }
-  }
-
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
+              d_subsystem.setReducedSpeed(false);
+              return d_subsystem.GenerateOnTheFlyCommand(targetPoses);
+            },
+            Set.of(d_subsystem)));
   }
 }
