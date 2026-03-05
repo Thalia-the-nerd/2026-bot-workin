@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANConstants;
+import frc.robot.SpeedConstants;
 
 /** Subsystem handling the intake/loading system. */
 public class IntakeSubsystem extends SubsystemBase {
@@ -40,7 +41,10 @@ public class IntakeSubsystem extends SubsystemBase {
    * @param speed Speed from -1.0 to 1.0. positive spins intake inward.
    */
   public void setIntakeSpeed(double speed) {
-    m_intakeMotorMain.set(speed);
+    double adjustedSpeed =
+        SpeedConstants.adjustSpeed(
+            speed, SpeedConstants.INTAKE_MAIN_MAX_SPEED, SpeedConstants.INTAKE_MAIN_SENSITIVITY);
+    m_intakeMotorMain.set(adjustedSpeed);
   }
 
   /** Stops the intake. */

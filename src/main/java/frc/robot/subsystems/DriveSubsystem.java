@@ -48,6 +48,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.CANConstants;
 import frc.robot.DriveConstants;
+import frc.robot.SpeedConstants;
 import java.util.ArrayList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
@@ -351,7 +352,15 @@ public class DriveSubsystem extends SubsystemBase {
   // **tank drive = specific control style where two parallel forces of motion are controlled to
   // create linear and rotational motion
   public void tankDrive(double leftSpeed, double rightSpeed) {
-    m_ddrive.tankDrive(leftSpeed, rightSpeed);
+    double adjLeft =
+        SpeedConstants.adjustSpeed(
+            leftSpeed, SpeedConstants.FRONT_LEFT_MAX_SPEED, SpeedConstants.FRONT_LEFT_SENSITIVITY);
+    double adjRight =
+        SpeedConstants.adjustSpeed(
+            rightSpeed,
+            SpeedConstants.FRONT_RIGHT_MAX_SPEED,
+            SpeedConstants.FRONT_RIGHT_SENSITIVITY);
+    m_ddrive.tankDrive(adjLeft, adjRight);
   }
 
   /**

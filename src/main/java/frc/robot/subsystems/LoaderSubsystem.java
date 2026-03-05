@@ -7,6 +7,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANConstants;
+import frc.robot.SpeedConstants;
 
 /** Subsystem handling the 3-motor loader. */
 public class LoaderSubsystem extends SubsystemBase {
@@ -45,7 +46,10 @@ public class LoaderSubsystem extends SubsystemBase {
    * @param speed Speed from -1.0 to 1.0. positive spins inward.
    */
   public void setLoaderSpeed(double speed) {
-    m_loaderMotor1.set(speed);
+    double adjustedSpeed =
+        SpeedConstants.adjustSpeed(
+            speed, SpeedConstants.LOADER_1_MAX_SPEED, SpeedConstants.LOADER_1_SENSITIVITY);
+    m_loaderMotor1.set(adjustedSpeed);
   }
 
   /** Stops the loader. */

@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.CANConstants;
+import frc.robot.SpeedConstants;
 
 public class TurretSubsystem extends SubsystemBase {
   private final SparkMax m_turretMotor;
@@ -74,7 +75,10 @@ public class TurretSubsystem extends SubsystemBase {
     if (Math.abs(speed) < 0.1) {
       speed = 0;
     }
-    m_pidController.setReference(speed, SparkMax.ControlType.kDutyCycle);
+    double adjustedSpeed =
+        SpeedConstants.adjustSpeed(
+            speed, SpeedConstants.TURRET_MAX_SPEED, SpeedConstants.TURRET_SENSITIVITY);
+    m_pidController.setReference(adjustedSpeed, SparkMax.ControlType.kDutyCycle);
   }
 
   /**
