@@ -188,8 +188,8 @@ Test the code without a physical robot:
 | 7  | Loader | Loader Loader Motor 1 | NEO Brushless |
 | 8  | Loader | Loader Loader Motor 2 | NEO Brushless |
 | 9  | Loader | Loader Loader Motor 3 | NEO Brushless |
-| 10 | Turret | Turret Rotation Motor | NEO 550 |
-| 11 | FireControl | Fire Kicker Motor | NEO 550 |
+| 10 | Turret | Turret Rotation Motor | NEO Brushless |
+| 11 | FireControl | Fire Kicker Motor | NEO Brushless |
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
 
