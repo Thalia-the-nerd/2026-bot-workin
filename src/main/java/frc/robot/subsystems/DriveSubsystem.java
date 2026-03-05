@@ -14,21 +14,20 @@ import com.pathplanner.lib.path.Waypoint;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -49,6 +48,8 @@ public class DriveSubsystem extends SubsystemBase {
   // Gyro
   private final AHRS m_Gyro;
 
+  private final SparkMax m_backLeft; // Main / Master Motor for Left
+  private final SparkMax m_frontLeft; // Slave Motor for Left (Follow Master)
   private final SparkMax m_backRight; // Main / Master Motor for Right
   private final SparkMax m_frontRight; // Slave Motor for Right (Follow Master)
 
@@ -111,7 +112,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontLeft = new SparkMax(CANConstants.MOTOR_FRONT_LEFT_ID, SparkMax.MotorType.kBrushless);
     m_frontRight = new SparkMax(CANConstants.MOTOR_FRONT_RIGHT_ID, SparkMax.MotorType.kBrushless);
     m_backRight = new SparkMax(CANConstants.MOTOR_BACK_RIGHT_ID, SparkMax.MotorType.kBrushless);
-    
+
     if (RobotBase.isSimulation()) {
       m_driveSim = new DriveSim(m_backLeft, m_backRight);
     }

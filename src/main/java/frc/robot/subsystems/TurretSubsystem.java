@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.CANConstants;
 import frc.robot.SpeedConstants;
 
@@ -82,24 +83,26 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   /**
-   * Sets the target position of the turret motor using closed-loop control.
+   * Sets the target angle of the turret using closed-loop control.
    *
-   * @param targetRotations Target position in motor rotations.
+   * @param targetAngleDegrees Target angle in degrees.
    */
-  public void setTargetPosition(double targetRotations) {
+  public void setTargetAngle(double targetAngleDegrees) {
+    double targetRotations = (targetAngleDegrees / 360.0) * Constants.TURRET_GEAR_RATIO;
     m_pidController.setReference(targetRotations, SparkMax.ControlType.kPosition);
   }
 
   /**
-   * Checks if the turret is at the specified target position.
+   * Checks if the turret is at the specified target angle.
    *
-   * @param targetRotations Target position in motor rotations.
-   * @param tolerance Tolerance in motor rotations.
+   * @param targetAngleDegrees Target angle in degrees.
+   * @param toleranceDegrees Tolerance in degrees.
    * @return True if within tolerance, false otherwise.
    */
-  public boolean isAtPosition(double targetRotations, double tolerance) {
-    double currentPos = m_encoder.getPosition();
-    return Math.abs(currentPos - targetRotations) <= tolerance;
+  public boolean isAtAngle(double targetAngleDegrees, double toleranceDegrees) {
+    double currentRotations = m_encoder.getPosition();
+    double currentAngle = (currentRotations / Constants.TURRET_GEAR_RATIO) * 360.0;
+    return Math.abs(currentAngle - targetAngleDegrees) <= toleranceDegrees;
   }
 
   /** Stops the turret motor. */

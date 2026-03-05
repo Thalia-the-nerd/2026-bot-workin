@@ -55,18 +55,18 @@ public class DriveSim {
         m_leftSim.getAppliedOutput() * RobotController.getInputVoltage(),
         -m_rightSim.getAppliedOutput() * RobotController.getInputVoltage());
     m_driveTrainSim.update(0.02);
-    
+
     m_leftSim.iterate(
         m_driveTrainSim.getLeftVelocityMetersPerSecond(), RoboRioSim.getVInVoltage(), 0.02);
     m_rightSim.iterate(
         m_driveTrainSim.getRightVelocityMetersPerSecond(), RoboRioSim.getVInVoltage(), 0.02);
-        
+
     RoboRioSim.setVInVoltage(
         BatterySim.calculateDefaultBatteryLoadedVoltage(m_driveTrainSim.getCurrentDrawAmps()));
-        
+
     // In Simulation, navX gets updated negatively
     SimGyroAngleHandler.set(-m_driveTrainSim.getHeading().getDegrees());
-    
+
     m_leftEncoderSim.setPosition(m_driveTrainSim.getLeftPositionMeters());
     m_leftEncoderSim.setVelocity(m_driveTrainSim.getLeftVelocityMetersPerSecond());
     m_rightEncoderSim.setPosition(m_driveTrainSim.getRightPositionMeters());
