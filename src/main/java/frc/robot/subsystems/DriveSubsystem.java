@@ -32,16 +32,15 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.CANConstants;
 import frc.robot.DriveConstants;
-import frc.robot.SpeedConstants;
+import frc.robot.RobotTelemetry;
+import frc.robot.constants.Constants.CANConstants;
+import frc.robot.constants.SpeedConstants;
 import java.util.ArrayList;
 import java.util.List;
-import org.littletonrobotics.junction.Logger;
 
 /** This Subsystem is what allows the code to interact with the drivetrain of the robot. */
 public class DriveSubsystem extends SubsystemBase {
@@ -196,7 +195,7 @@ public class DriveSubsystem extends SubsystemBase {
           "WARNING: PathPlanner autoConfig is null! AutoBuilder was NOT configured.");
     }
 
-    SmartDashboard.putData("Field", field); // add field to dashboard
+    RobotTelemetry.putData("Field", field); // add field to dashboard
 
     // setup SysID for auto profiling
     m_sysIdRoutine =
@@ -205,7 +204,7 @@ public class DriveSubsystem extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("SysIdTestState", state.toString())),
+                (state) -> RobotTelemetry.recordOutput("SysIdTestState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> this.setVoltage(voltage, voltage),
                 null, // No log consumer, since data is recorded by URCL
@@ -451,7 +450,7 @@ public class DriveSubsystem extends SubsystemBase {
     if (cameraEnabled) {
       m_driveOdometry.addVisionMeasurement(visionRobotPose, timestamp);
     }
-    Logger.recordOutput("PoseCamera" + cameraName, visionRobotPose);
+    RobotTelemetry.recordOutput("PoseCamera" + cameraName, visionRobotPose);
   }
 
   public void resetEncoders() {
@@ -566,17 +565,18 @@ public class DriveSubsystem extends SubsystemBase {
       gyroZeroPending = false;
     }
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Average Distance Traveled", currentDistance());
-    SmartDashboard.putNumber("Current Gyro Yaw", getYaw());
-    SmartDashboard.putBoolean("Gyro Calibrating", m_Gyro.isCalibrating());
+    RobotTelemetry.putNumber("Average Distance Traveled", currentDistance());
+    RobotTelemetry.putNumber("Current Gyro Yaw", getYaw());
+    RobotTelemetry.putBoolean("Gyro Calibrating", m_Gyro.isCalibrating());
     // Update the odometry in the periodic block
     m_driveOdometry.update(getRotation2d(), getPositionLeft(), getPositionRight());
     field.setRobotPose(getPose());
-    Logger.recordOutput("RobotPose", getPose());
-    Logger.recordOutput("DriveLeftMotorPositionRotations", m_encoderBackLeft.getPosition());
-    Logger.recordOutput("DriveRightMotorPositionRotations", m_encoderBackRight.getPosition());
-    Logger.recordOutput("DriveLeftMotorVelocityRPM", m_encoderBackLeft.getVelocity());
-    Logger.recordOutput("DriveRightMotorVelocityRPM", m_encoderBackRight.getVelocity());
+    RobotTelemetry.recordOutput("RobotPose", getPose());
+    RobotTelemetry.recordOutput("DriveLeftMotorPositionRotations", m_encoderBackLeft.getPosition());
+    RobotTelemetry.recordOutput(
+        "DriveRightMotorPositionRotations", m_encoderBackRight.getPosition());
+    RobotTelemetry.recordOutput("DriveLeftMotorVelocityRPM", m_encoderBackLeft.getVelocity());
+    RobotTelemetry.recordOutput("DriveRightMotorVelocityRPM", m_encoderBackRight.getVelocity());
   }
 
   @Override

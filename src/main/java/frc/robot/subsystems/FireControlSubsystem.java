@@ -5,15 +5,16 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.CANConstants;
-import frc.robot.SpeedConstants;
+import frc.robot.RobotTelemetry;
+import frc.robot.constants.Constants.CANConstants;
+import frc.robot.constants.SpeedConstants;
 
 public class FireControlSubsystem extends SubsystemBase {
   private final SparkMax m_fireMotor;
   private final SparkMaxConfig m_config;
 
+  @SuppressWarnings("removal")
   public FireControlSubsystem() {
     m_fireMotor = new SparkMax(CANConstants.MOTOR_FIRE_ID, MotorType.kBrushless);
     m_config = new SparkMaxConfig();
@@ -44,12 +45,12 @@ public class FireControlSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Debugging current fire motor speed
-    SmartDashboard.putNumber("Fire Motor Speed Output", m_fireMotor.get());
+    RobotTelemetry.putNumber("Fire Motor Speed Output", m_fireMotor.get());
   }
 
   @Override
   public void simulationPeriodic() {
     // Broadcast for Python App
-    SmartDashboard.putBoolean("Sim_IsFiring", Math.abs(m_fireMotor.get()) > 0.1);
+    RobotTelemetry.putBoolean("Sim_IsFiring", Math.abs(m_fireMotor.get()) > 0.1);
   }
 }

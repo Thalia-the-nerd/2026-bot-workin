@@ -12,11 +12,11 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.Constants.CANConstants;
-import frc.robot.SpeedConstants;
+import frc.robot.RobotTelemetry;
+import frc.robot.constants.Constants;
+import frc.robot.constants.Constants.CANConstants;
+import frc.robot.constants.SpeedConstants;
 
 public class TurretSubsystem extends SubsystemBase {
   private final SparkMax m_turretMotor;
@@ -34,6 +34,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final SparkRelativeEncoderSim m_encoderSim;
   private final SingleJointedArmSim m_physicsSim;
 
+  @SuppressWarnings("removal")
   public TurretSubsystem() {
     m_turretMotor = new SparkMax(CANConstants.MOTOR_TURRET_ID, MotorType.kBrushless);
     m_config = new SparkMaxConfig();
@@ -79,7 +80,10 @@ public class TurretSubsystem extends SubsystemBase {
     double adjustedSpeed =
         SpeedConstants.adjustSpeed(
             speed, SpeedConstants.TURRET_MAX_SPEED, SpeedConstants.TURRET_SENSITIVITY);
-    m_pidController.setReference(adjustedSpeed, SparkMax.ControlType.kDutyCycle);
+    m_pidController.setReference(
+        adjustedSpeed,
+        SparkMax.ControlType.kDutyCycle,
+        com.revrobotics.spark.ClosedLoopSlot.kSlot0);
   }
 
   /**
@@ -89,7 +93,10 @@ public class TurretSubsystem extends SubsystemBase {
    */
   public void setTargetAngle(double targetAngleDegrees) {
     double targetRotations = (targetAngleDegrees / 360.0) * Constants.TURRET_GEAR_RATIO;
-    m_pidController.setReference(targetRotations, SparkMax.ControlType.kPosition);
+    m_pidController.setReference(
+        targetRotations,
+        SparkMax.ControlType.kPosition,
+        com.revrobotics.spark.ClosedLoopSlot.kSlot0);
   }
 
   /**
@@ -113,8 +120,8 @@ public class TurretSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Output current state of turret motor for debugging
-    SmartDashboard.putNumber("Turret Motor Speed Output", m_turretMotor.get());
-    SmartDashboard.putNumber("Turret Position", m_encoder.getPosition());
+    RobotTelemetry.putNumber("Turret Motor Speed Output", m_turretMotor.get());
+    RobotTelemetry.putNumber("Turret Position", m_encoder.getPosition());
   }
 
   @Override
@@ -127,6 +134,6 @@ public class TurretSubsystem extends SubsystemBase {
     m_encoderSim.setPosition(m_physicsSim.getAngleRads() / (2 * Math.PI) * 10.0); // Gear ratio 10
 
     // Broadcast for Python App
-    SmartDashboard.putNumber("Sim_TurretAngle", Math.toDegrees(m_physicsSim.getAngleRads()));
+    RobotTelemetry.putNumber("Sim_TurretAngle", Math.toDegrees(m_physicsSim.getAngleRads()));
   }
 }

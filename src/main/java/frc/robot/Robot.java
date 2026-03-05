@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.constants.Constants;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -109,6 +110,7 @@ public class Robot extends LoggedRobot {
     if (m_robotContainer.enableAutoProfiling) {
       System.out.println("WARNING, AUTO PROFILE IS ENABLED!");
     }
+    frc.robot.constants.SpeedConstants.syncNetworkTables();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

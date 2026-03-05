@@ -9,8 +9,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotTelemetry;
 
 public class TankSubsystem extends SubsystemBase {
 
@@ -42,7 +42,7 @@ public class TankSubsystem extends SubsystemBase {
         rightLeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     drive = new DifferentialDrive(leftFront, rightFront);
-    SmartDashboard.putData("Field", m_field);
+    RobotTelemetry.putData("Field", m_field);
   }
 
   public void drive(double speed, double rotation) {

@@ -15,14 +15,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.CameraConstants;
+import frc.robot.RobotTelemetry;
+import frc.robot.constants.CameraConstants;
 import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.littletonrobotics.junction.Logger;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -75,7 +75,7 @@ public class AimCommand extends SequentialCommandGroup {
 
               double detectedArea = target.area;
               double distance = distancePowerA * Math.pow(detectedArea, distancePowerB);
-              Logger.recordOutput("BallDistance", distance);
+              RobotTelemetry.recordOutput("BallDistance", distance);
 
               double yaw = Units.degreesToRadians(target.getYaw());
               double distance_x = distance * Math.cos(yaw);
@@ -84,17 +84,17 @@ public class AimCommand extends SequentialCommandGroup {
                   new Transform3d(
                       new Translation3d(distance_x, distance_y, 0), new Rotation3d(0, 0, yaw));
 
-              Logger.recordOutput("AimCamToTargetTransform", cameraToTarget);
+              RobotTelemetry.recordOutput("AimCamToTargetTransform", cameraToTarget);
 
               Transform3d targetOffset = cameraToTarget.plus(targetingOffset);
-              Logger.recordOutput("AimTargetRelRobotPose", targetOffset);
+              RobotTelemetry.recordOutput("AimTargetRelRobotPose", targetOffset);
 
               Pose3d robotPose = new Pose3d(d_subsystem.getPose());
               Pose3d robotToTarget = robotPose.plus(targetOffset);
-              Logger.recordOutput("AimNavRelPose", robotToTarget);
+              RobotTelemetry.recordOutput("AimNavRelPose", robotToTarget);
 
               Pose2d newTargetPose = robotToTarget.toPose2d();
-              Logger.recordOutput("AimNav2dPose", newTargetPose);
+              RobotTelemetry.recordOutput("AimNav2dPose", newTargetPose);
 
               Rotation2d newRotation = new Rotation2d(newTargetPose.getRotation().getDegrees());
 
