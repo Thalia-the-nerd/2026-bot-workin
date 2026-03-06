@@ -13,6 +13,8 @@ use std::f64::consts::PI;
 pub extern "C" fn calculate_aim_angle(
     robot_x: f64,
     robot_y: f64,
+    robot_vx: f64,
+    robot_vy: f64,
     target_x: f64,
     target_y: f64,
     target_size: f64,
@@ -44,19 +46,37 @@ pub extern "C" fn calculate_aim_angle(
         // the turret FROM the robot TO the face center.
         let aim_dx = face_center_x - robot_x;
         let aim_dy = face_center_y - robot_y;
+        let dist = (aim_dx * aim_dx + aim_dy * aim_dy).sqrt();
         
+        // Kinematics Calculation (3D Ballistics & Momentum)
+        // Assume bullet time of flight is distance / 600 px/s
+        let t = dist / 600.0;
+        
+        // Needed absolute velocity to hit the face center in time `t`
+        let abs_vx = aim_dx / t;
+        let abs_vy = aim_dy / t;
+        
+        // The turret must counteract the current robot velocity
+        let fire_vx = abs_vx - robot_vx;
+        let fire_vy = abs_vy - robot_vy;
+        
+        // 3D gravity arc (assuming targets are vertically equal, dz=0)
+        let g = 981.0;
+        let fire_vz = 0.5 * g * t; // (dz/t + 0.5*g*t) with dz=0
+        
+        // Total magnitude of exiting projectile from the barrel
+        let fire_speed_3d = (fire_vx * fire_vx + fire_vy * fire_vy + fire_vz * fire_vz).sqrt();
+
         unsafe {
             if !out_angle.is_null() {
-                *out_angle = aim_dy.atan2(aim_dx);
+                *out_angle = fire_vy.atan2(fire_vx);
             }
             if !out_distance.is_null() {
-                *out_distance = (aim_dx * aim_dx + aim_dy * aim_dy).sqrt();
+                *out_distance = dist;
             }
             if !out_required_rpm.is_null() {
-                // Simplified RPM model: Map RPM linearly or quadratically to distance
-                // For this simulation: RPM = distance * 2.5 + 500
-                let dist = (aim_dx * aim_dx + aim_dy * aim_dy).sqrt();
-                *out_required_rpm = (dist * 2.5) + 500.0;
+                // Map the required exit velocity to real-world physics RPM 
+                *out_required_rpm = fire_speed_3d * 2.15;
             }
         }
         true

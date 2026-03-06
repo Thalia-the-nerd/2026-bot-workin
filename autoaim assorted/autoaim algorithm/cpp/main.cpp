@@ -12,7 +12,7 @@ void test_aim(double robot_x, double robot_y, double target_x, double target_y, 
     std::cout << "Robot @ (" << std::setw(5) << robot_x << ", " << std::setw(5) << robot_y << ")\t-> ";
     
     bool can_hit = calculate_aim_angle(
-        robot_x, robot_y, 
+        robot_x, robot_y, 0.0, 0.0, 
         target_x, target_y, 
         target_size, target_rotation, 
         &angle, &distance, &rpm

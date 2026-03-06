@@ -24,6 +24,8 @@ extern "C" {
 bool calculate_aim_angle(
     double robot_x,
     double robot_y,
+    double robot_vx,
+    double robot_vy,
     double target_x,
     double target_y,
     double target_size,

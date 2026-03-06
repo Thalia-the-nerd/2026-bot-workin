@@ -61,15 +61,23 @@ async fn main() {
     loop {
         let dt = get_frame_time();
 
+        // Calculate velocity (kinematics mapping)
+        let mut robot_vx = 0.0;
+        let mut robot_vy = 0.0;
+        
         // Driving Inputs
         if is_key_down(KeyCode::Up) || is_key_down(KeyCode::W) {
-            robot_x += robot_rot.cos() * ROBOT_SPEED * dt;
-            robot_y += robot_rot.sin() * ROBOT_SPEED * dt;
+            robot_vx = robot_rot.cos() * ROBOT_SPEED;
+            robot_vy = robot_rot.sin() * ROBOT_SPEED;
         }
         if is_key_down(KeyCode::Down) || is_key_down(KeyCode::S) {
-            robot_x -= robot_rot.cos() * ROBOT_SPEED * dt;
-            robot_y -= robot_rot.sin() * ROBOT_SPEED * dt;
+            robot_vx = -robot_rot.cos() * ROBOT_SPEED;
+            robot_vy = -robot_rot.sin() * ROBOT_SPEED;
         }
+        
+        robot_x += robot_vx * dt;
+        robot_y += robot_vy * dt;
+        
         if is_key_down(KeyCode::Left) || is_key_down(KeyCode::A) {
             robot_rot -= ROBOT_ROT_SPEED * dt;
         }
@@ -77,7 +85,7 @@ async fn main() {
             robot_rot += ROBOT_ROT_SPEED * dt;
         }
 
-        // Calculate autoaim using out algorithm
+        // Calculate autoaim using kinematic algorithm
         let mut target_angle_out: f64 = 0.0;
         let mut target_distance_out: f64 = 0.0;
         let mut target_rpm_out: f64 = 0.0;
@@ -85,6 +93,8 @@ async fn main() {
         let can_hit = calculate_aim_angle(
             robot_x as f64,
             robot_y as f64,
+            robot_vx as f64,
+            robot_vy as f64,
             target_x as f64,
             target_y as f64,
             target_size as f64,
@@ -139,11 +149,16 @@ async fn main() {
 
         // Fire Projectiles
         if is_key_pressed(KeyCode::Space) {
+            // Apply projectile exit velocity based on the derived mathematical algorithm mapping
+            // Note: fire_vx and fire_vy in standard mapping represent relative to target. To shoot it in GUI:
+            // The algorithm selected t = dist / 600.0, yielding fire_speed_surface.
+            // We just use the robot momentum alongside the directed turret RPM map.
+            let firing_velocity_xy = (current_rpm as f32) / 2.15; // Extract physics magnitude
             projectiles.push(Projectile{
                 x: robot_x + turret_rot.cos() * 50.0, // spawn at turret tip
                 y: robot_y + turret_rot.sin() * 50.0,
-                vx: turret_rot.cos() * PROJECTILE_SPEED,
-                vy: turret_rot.sin() * PROJECTILE_SPEED,
+                vx: robot_vx + turret_rot.cos() * firing_velocity_xy,
+                vy: robot_vy + turret_rot.sin() * firing_velocity_xy,
                 life: 3.0, // dies after 3 seconds
                 state: ProjectileState::Active,
                 blink_timer: 1.0, // 1 second red blink on wrong hit
