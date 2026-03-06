@@ -46,23 +46,36 @@ pub extern "C" fn calculate_aim_angle(
         let aim_dy = face_center_y - robot_y;
         let dist = (aim_dx * aim_dx + aim_dy * aim_dy).sqrt();
         
-        // Kinematics Calculation (3D Ballistics & Momentum)
-        // Assume bullet time of flight is distance / 600 px/s
+        // Kinematics Calculation (3D Ballistics & Momentum compensation)
+        // -------------------------------------------------------------
+        // We assume the projectile travels at a fixed horizontal speed 
+        // multiplier mapping to a time of flight `t = dist / 600.0`.
         let t = dist / 600.0;
         
-        // Needed absolute velocity to hit the face center in time `t`
+        // 1. Calculate Absolute Velocity 
+        // This is the absolute X/Y world-velocity the bullet MUST travel 
+        // at to cross the `aim_dx` and `aim_dy` distance exactly in time `t`.
         let abs_vx = aim_dx / t;
         let abs_vy = aim_dy / t;
         
-        // The turret must counteract the current robot velocity
+        // 2. Momentum Subtraction (Relative Velocity)
+        // The bullet inherits the robot's current chassis velocity when 
+        // it leaves the barrel. Thus, the turret only needs to supply 
+        // the *difference* between the target absolute velocity and the 
+        // robot's current velocity.
         let fire_vx = abs_vx - robot_vx;
         let fire_vy = abs_vy - robot_vy;
         
-        // 3D gravity arc (assuming targets are vertically equal, dz=0)
-        let g = 981.0;
-        let fire_vz = 0.5 * g * t; // (dz/t + 0.5*g*t) with dz=0
+        // 3. Gravity Arc (Z-Axis)
+        // To reach the target before hitting the floor, it must be fired 
+        // slightly upwards. We use `d = vt + 0.5at^2` (simplified to `v = 0.5 * g * t` 
+        // assuming target and shooter are at the same height `dz = 0`).
+        let g = 981.0; // Approximation of gravity mapping
+        let fire_vz = 0.5 * g * t; 
         
-        // Total magnitude of exiting projectile from the barrel
+        // 4. Total 3D RPM Magnitude Component
+        // The total exit speed of the projectile leaving the barrel is the 
+        // Pythagorean sum of its X, Y, and Z relative velocity vectors.
         let fire_speed_3d = (fire_vx * fire_vx + fire_vy * fire_vy + fire_vz * fire_vz).sqrt();
 
         unsafe {

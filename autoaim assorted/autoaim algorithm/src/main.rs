@@ -150,27 +150,34 @@ async fn main() {
         if is_key_pressed(KeyCode::Space) {
             let mut firing_velocity_xy = 0.0;
             if current_distance > 0.0 {
-                // To display it properly: The algorithm assumes time of flight is dist / 600.
-                // The actual required exit velocity of the turret is calculated natively as vectors:
+                // --- 2D KINEMATICS EXTRACTION ---
+                // The C-ABI calculate_aim_angle outputs a 3D RPM that includes Z-gravity.
+                // However, our 2D top-down simulation shouldn't use Z-gravity to draw XY movement!
+                // So here we locally replicate *just* the 2D XY turret exit velocity component:
                 let t = (current_distance as f32) / 600.0;
                 let aim_dx = target_x - robot_x;
                 let aim_dy = target_y - robot_y;
                 let req_vx_world = aim_dx / t;
                 let req_vy_world = aim_dy / t;
 
-                // The *exit velocity* the ball must have relative to the robot is:
+                // The relative exit velocity of the turret (subtracting robot momentum)
                 let fire_vx = req_vx_world - robot_vx;
                 let fire_vy = req_vy_world - robot_vy;
                 firing_velocity_xy = (fire_vx * fire_vx + fire_vy * fire_vy).sqrt();
             }
 
+            // --- WORLD SPACE PROJECTILE SPAWN ---
+            // A common bug is mapping the projectile's `vx` directly to `robot_vx` continually.
+            // This causes the bullet to "curve" mid-air like a magnet whenever the robot turns!
+            // Instead, we lock in the total world space velocity ONCE at the exact moment of firing.
+            let fire_world_vx = robot_vx + turret_rot.cos() * firing_velocity_xy;
+            let fire_world_vy = robot_vy + turret_rot.sin() * firing_velocity_xy;
+
             projectiles.push(Projectile{
                 x: robot_x + turret_rot.cos() * 50.0, // spawn at turret tip
                 y: robot_y + turret_rot.sin() * 50.0,
-                // In world space, the velocity is the robot's velocity + the ball's relative exit velocity 
-                // in the direction the turret is pointing.
-                vx: robot_vx + turret_rot.cos() * firing_velocity_xy,
-                vy: robot_vy + turret_rot.sin() * firing_velocity_xy,
+                vx: fire_world_vx,
+                vy: fire_world_vy,
                 life: 3.0, // dies after 3 seconds
                 state: ProjectileState::Active,
                 blink_timer: 1.0, // 1 second red blink on wrong hit
