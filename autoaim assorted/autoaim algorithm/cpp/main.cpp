@@ -6,6 +6,8 @@
 // Helper function to simulate a robot driving around a square target
 void test_aim(double robot_x, double robot_y, double target_x, double target_y, double target_size, double target_rotation) {
     double angle = 0.0;
+    double distance = 0.0;
+    double rpm = 0.0;
     
     std::cout << "Robot @ (" << std::setw(5) << robot_x << ", " << std::setw(5) << robot_y << ")\t-> ";
     
@@ -13,13 +15,14 @@ void test_aim(double robot_x, double robot_y, double target_x, double target_y, 
         robot_x, robot_y, 
         target_x, target_y, 
         target_size, target_rotation, 
-        &angle
+        &angle, &distance, &rpm
     );
     
     if (can_hit) {
         // Convert radians to degrees for easier reading
         double angle_deg = angle * 180.0 / M_PI;
-        std::cout << "[SUCCESS] Turf angle set to " << std::fixed << std::setprecision(2) << angle_deg << " deg" << std::endl;
+        std::cout << "[SUCCESS] Turf angle set to " << std::fixed << std::setprecision(2) << angle_deg 
+                  << " deg | Dist: " << distance << " | RPM: " << rpm << std::endl;
     } else {
         std::cout << "[FAILED]  No line of sight to the designated face!" << std::endl;
     }

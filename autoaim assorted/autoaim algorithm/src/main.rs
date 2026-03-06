@@ -5,6 +5,15 @@ use std::f32::consts::PI;
 const ROBOT_SPEED: f32 = 200.0; // pixels per second
 const ROBOT_ROT_SPEED: f32 = 2.5; // rad per second
 const TURRET_ROT_SPEED: f32 = 5.0; // rad per second
+const PROJECTILE_SPEED: f32 = 400.0; // pixels per second (speed of fired balls)
+
+struct Projectile {
+    x: f32,
+    y: f32,
+    vx: f32,
+    vy: f32,
+    life: f32,
+}
 
 #[macroquad::main("Autoaim Simulation")]
 async fn main() {
@@ -18,6 +27,12 @@ async fn main() {
     let target_y = screen_height() / 2.0;
     let target_size = 100.0;
     let target_rot: f32 = 0.0; // facing right (+X) is the designated front face
+
+    let mut projectiles: Vec<Projectile> = vec![];
+
+    // Physics output states
+    let mut current_distance: f64 = 0.0;
+    let mut current_rpm: f64 = 0.0;
 
     loop {
         let dt = get_frame_time();
@@ -40,6 +55,9 @@ async fn main() {
 
         // Calculate autoaim using out algorithm
         let mut target_angle_out: f64 = 0.0;
+        let mut target_distance_out: f64 = 0.0;
+        let mut target_rpm_out: f64 = 0.0;
+        
         let can_hit = calculate_aim_angle(
             robot_x as f64,
             robot_y as f64,
@@ -48,11 +66,15 @@ async fn main() {
             target_size as f64,
             target_rot as f64,
             &mut target_angle_out,
+            &mut target_distance_out,
+            &mut target_rpm_out,
         );
 
         // Move turret towards target angle respects TURRET_ROT_SPEED
         if can_hit {
             let target_angle = target_angle_out as f32;
+            current_distance = target_distance_out;
+            current_rpm = target_rpm_out;
             
             // Shortest path to target angle
             let mut diff = target_angle - turret_rot;
@@ -68,6 +90,9 @@ async fn main() {
                 turret_rot += diff.signum() * max_step;
             }
         } else {
+            current_distance = 0.0;
+            current_rpm = 0.0;
+
             // Revert turret to robot's forward facing if no target
             let mut diff = robot_rot - turret_rot;
             diff = (diff + PI) % (2.0 * PI) - PI;
@@ -88,30 +113,58 @@ async fn main() {
             turret_rot += 2.0 * PI;
         }
 
-        clear_background(DARKGRAY);
-
-        // Draw Instructions
-        draw_text("WASD or Arrows to Drive", 20.0, 30.0, 30.0, WHITE);
-        if can_hit {
-            draw_text("Targeting: LOCKED", 20.0, 60.0, 30.0, GREEN);
-        } else {
-            draw_text("Targeting: NO LINE OF SIGHT", 20.0, 60.0, 30.0, RED);
+        // Fire Projectiles
+        if is_key_pressed(KeyCode::Space) {
+            projectiles.push(Projectile{
+                x: robot_x + turret_rot.cos() * 50.0, // spawn at turret tip
+                y: robot_y + turret_rot.sin() * 50.0,
+                vx: turret_rot.cos() * PROJECTILE_SPEED,
+                vy: turret_rot.sin() * PROJECTILE_SPEED,
+                life: 3.0, // dies after 3 seconds
+            });
         }
 
+        // Update Physics
+        for proj in &mut projectiles {
+            proj.x += proj.vx * dt;
+            proj.y += proj.vy * dt;
+            proj.life -= dt;
+        }
+
+        // Remove dead projectiles
+        projectiles.retain(|p| p.life > 0.0);
+
+        clear_background(DARKGRAY);
+
+        // --- DRAW UI SIDE PANEL ---
+        draw_rectangle(0.0, 0.0, 300.0, screen_height(), Color::new(0.1, 0.1, 0.1, 0.9));
+        draw_text("Autoaim Subsystem Status", 10.0, 30.0, 24.0, WHITE);
+        draw_text("------------------------", 10.0, 50.0, 24.0, GRAY);
+        
+        let hud_color = if can_hit { GREEN } else { RED };
+        let lock_str = if can_hit { "LOCKED" } else { "NO SIGHTLINE" };
+        
+        draw_text(&format!("Target Status: {}", lock_str), 10.0, 80.0, 20.0, hud_color);
+        draw_text(&format!("Dist to Target: {:.2}m", current_distance), 10.0, 110.0, 20.0, WHITE);
+        draw_text(&format!("Calculated RPM: {:.0}", current_rpm), 10.0, 140.0, 20.0, ORANGE);
+        draw_text(&format!("Robot Ang (deg): {:.0}", robot_rot.to_degrees()), 10.0, 170.0, 20.0, WHITE);
+        draw_text(&format!("Turret Ang (deg): {:.0}", turret_rot.to_degrees()), 10.0, 200.0, 20.0, ORANGE);
+        
+        draw_text("------------------------", 10.0, 230.0, 24.0, GRAY);
+        draw_text("Controls:", 10.0, 260.0, 20.0, WHITE);
+        draw_text("[WASD] - Drive Chassis", 10.0, 290.0, 20.0, LIGHTGRAY);
+        draw_text("[SPACE] - Fire Projectile", 10.0, 320.0, 20.0, LIGHTGRAY);
+
         // --- DRAW TARGET ---
-        // We simulate the rotation by drawing lines for the square
-        // designated face (East face if rot=0) drawn in a special color
         let tr_cos = target_rot.cos();
         let tr_sin = target_rot.sin();
         let half = target_size / 2.0;
 
-        // four corners relative to center before rotation
-        let c1 = vec2(half, half); // top-right
-        let c2 = vec2(-half, half); // top-left
-        let c3 = vec2(-half, -half); // bottom-left
-        let c4 = vec2(half, -half); // bottom-right
+        let c1 = vec2(half, half);
+        let c2 = vec2(-half, half);
+        let c3 = vec2(-half, -half);
+        let c4 = vec2(half, -half);
 
-        // rotate and translate
         let rot_p = |p: Vec2| -> Vec2 {
             vec2(
                 target_x + p.x * tr_cos - p.y * tr_sin,
@@ -124,19 +177,21 @@ async fn main() {
         let p3 = rot_p(c3);
         let p4 = rot_p(c4);
 
-        // Faces: (p4->p1 is the front face +X)
         draw_line(p1.x, p1.y, p2.x, p2.y, 3.0, BLUE); // Back
         draw_line(p2.x, p2.y, p3.x, p3.y, 3.0, BLUE); // Side
         draw_line(p3.x, p3.y, p4.x, p4.y, 3.0, BLUE); // Side
-        // Front Face (Designated target face)
-        draw_line(p4.x, p4.y, p1.x, p1.y, 6.0, GREEN); 
+        draw_line(p4.x, p4.y, p1.x, p1.y, 6.0, GREEN); // Designated Front Target Face
 
-        // Draw Target Center
         draw_circle(target_x, target_y, 4.0, RED);
+
+        // --- DRAW PROJECTILES ---
+        for proj in &projectiles {
+            draw_circle(proj.x, proj.y, 6.0, YELLOW);
+        }
 
         // --- DRAW ROBOT ---
         draw_circle(robot_x, robot_y, 25.0, BLUE);
-        // Draw Robot Forward Indicator
+        // Forward Indicator
         draw_line(
             robot_x, robot_y,
             robot_x + robot_rot.cos() * 35.0,

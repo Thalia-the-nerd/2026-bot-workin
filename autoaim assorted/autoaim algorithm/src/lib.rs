@@ -18,6 +18,8 @@ pub extern "C" fn calculate_aim_angle(
     target_size: f64,
     target_rotation_rad: f64,
     out_angle: *mut f64,
+    out_distance: *mut f64,
+    out_required_rpm: *mut f64,
 ) -> bool {
     // Determine the center point of the designated face.
     // Assuming the "front" face is at +size/2 in the direction of the target's rotation.
@@ -46,6 +48,15 @@ pub extern "C" fn calculate_aim_angle(
         unsafe {
             if !out_angle.is_null() {
                 *out_angle = aim_dy.atan2(aim_dx);
+            }
+            if !out_distance.is_null() {
+                *out_distance = (aim_dx * aim_dx + aim_dy * aim_dy).sqrt();
+            }
+            if !out_required_rpm.is_null() {
+                // Simplified RPM model: Map RPM linearly or quadratically to distance
+                // For this simulation: RPM = distance * 2.5 + 500
+                let dist = (aim_dx * aim_dx + aim_dy * aim_dy).sqrt();
+                *out_required_rpm = (dist * 2.5) + 500.0;
             }
         }
         true

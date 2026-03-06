@@ -17,6 +17,8 @@ extern "C" {
  * @param target_size Side length of the square target.
  * @param target_rotation_rad Rotation of the target in radians (determines where the face is).
  * @param out_angle Pointer to a double where the resulting angle (in radians) will be stored.
+ * @param out_distance Pointer to a double where the resulting distance to target is stored.
+ * @param out_required_rpm Pointer to a double where the required firing RPM is stored.
  * @return true if the face is visible and a valid angle was calculated, false otherwise.
  */
 bool calculate_aim_angle(
@@ -26,7 +28,9 @@ bool calculate_aim_angle(
     double target_y,
     double target_size,
     double target_rotation_rad,
-    double* out_angle
+    double* out_angle,
+    double* out_distance,
+    double* out_required_rpm
 );
 
 #ifdef __cplusplus
