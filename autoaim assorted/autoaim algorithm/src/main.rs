@@ -117,14 +117,9 @@ async fn main() {
     let mut cam_yaw: f32 = robot_yaw;
     let mut cam_pitch: f32 = 0.5; // rad up from horizontal
     let mut cam_dist: f32 = 12.0;
-    
-    let mut fire_cooldown: f32 = 0.0;
 
     loop {
         let dt = get_frame_time();
-        if fire_cooldown > 0.0 {
-            fire_cooldown -= dt;
-        }
 
         // =================================================================
         // 0. CAMERA INPUTS (Mouse Pan & Zoom)
@@ -272,10 +267,8 @@ async fn main() {
         // lead calculated by the quadratic solver above.
         let is_locked = can_hit && (desired_yaw - turret_yaw).abs() < 0.05;
 
-        let wants_to_fire = is_key_pressed(KeyCode::Space) || (is_locked && fire_cooldown <= 0.0);
-
-        if wants_to_fire && can_hit {
-            fire_cooldown = 0.2; // Auto-fire max 5 times a second
+        // Auto-fire whenever firmly locked
+        if is_locked {
             let spawn_pos = vec3(
                 robot_x + turret_yaw.cos() * 1.5,
                 ROBOT_HEIGHT,
@@ -588,7 +581,7 @@ async fn main() {
         draw_text("========================", 10.0, 230.0, 20.0, GRAY);
         draw_text("Controls:", 10.0, 260.0, 20.0, WHITE);
         draw_text("[WASD]  Drive Chassis", 10.0, 285.0, 18.0, LIGHTGRAY);
-        draw_text("[SPACE] Fire (or AUTO-FIRE when locked)", 10.0, 310.0, 18.0, LIGHTGRAY);
+        draw_text("[AUTO]  Fires Automatically", 10.0, 310.0, 18.0, GREEN);
         draw_text("[MOUSE] Drag to orbit, scroll zoom", 10.0, 335.0, 18.0, LIGHTGRAY);
 
         draw_text(&format!("Projectiles: {}", projectiles.len()), 10.0, 370.0, 18.0, YELLOW);
