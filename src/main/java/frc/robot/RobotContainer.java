@@ -3,14 +3,12 @@ package frc.robot;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AimCommand;
 import frc.robot.commands.AutoAimCommand;
@@ -19,6 +17,7 @@ import frc.robot.commands.FireCommand;
 import frc.robot.commands.IntakeSliderCommand;
 import frc.robot.commands.SetTurretPositionCommand;
 import frc.robot.commands.UnjamIntakeCommand;
+import frc.robot.constants.Constants;
 import frc.robot.subsystems.CameraSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.FireControlSubsystem;
@@ -36,11 +35,10 @@ public class RobotContainer {
   // The Controller (Port 0 is usually the first USB controller plugged in)
   private final CommandXboxController m_controller1 =
       new CommandXboxController(Constants.CONTROLLER_USB_INDEX);
-  private final Joystick m_flightstick = new Joystick(Constants.FLIGHTSTICK_USB_INDEX);
+  private final CommandJoystick m_flightstick =
+      new CommandJoystick(Constants.FLIGHTSTICK_USB_INDEX);
 
   // Initialize subsystems
-  // private final SwerveSubsystem swerveSubsystem = new SwerveSubsystem(new
-  // File(Filesystem.getDeployDirectory(), "swerve"));
   private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
   private final CameraSubsystem m_cameraSubsystem = new CameraSubsystem(m_driveSubsystem);
 
@@ -57,21 +55,6 @@ public class RobotContainer {
           this::getControllerRightY,
           () -> m_controller1.getHID().getLeftBumper());
   private final AimCommand m_aimCommand = new AimCommand(m_driveSubsystem, m_cameraSubsystem);
-
-  // Init controller buttons
-  private Trigger m_toggleBrakeButton;
-  private Trigger m_switchQueuedButton;
-  private Trigger m_toggleIntakeButton;
-  // Init joystick buttons
-  private JoystickButton m_operatorDefaultButton;
-  private JoystickButton m_operatorButton2;
-  private JoystickButton m_operatorButton6;
-  private JoystickButton m_operatorButton7;
-  private JoystickButton m_operatorButton8;
-  private JoystickButton m_operatorButton9;
-  private JoystickButton m_operatorButton10;
-  private JoystickButton m_operatorButton11;
-  private JoystickButton m_operatorButton12;
 
   // Init For Autonomous
   private LoggedDashboardChooser<String> autoDashboardChooser =
@@ -92,8 +75,7 @@ public class RobotContainer {
     initializeAutonomous();
     // Setup on the fly path planning
     configureTeleopPaths();
-    // Configure the button bindings
-    setupTriggers();
+
     if (enableAutoProfiling) {
       // bindDriveSysIDCommands();
       bindDriveSysIDCommands();
@@ -103,32 +85,17 @@ public class RobotContainer {
     }
   }
 
-  private void setupTriggers() {
-    // Controller Buttons
-    m_toggleBrakeButton = m_controller1.rightBumper();
-    m_switchQueuedButton = m_controller1.y();
-    m_toggleIntakeButton = m_controller1.a();
-
-    // Joystick Buttons
-    m_operatorDefaultButton =
-        new JoystickButton(m_flightstick, Constants.JOYSTICK_DEFAULT_BUTTON); //
-    m_operatorButton2 = new JoystickButton(m_flightstick, 2);
-    m_operatorButton6 = new JoystickButton(m_flightstick, 6);
-    m_operatorButton7 = new JoystickButton(m_flightstick, 7);
-    m_operatorButton8 = new JoystickButton(m_flightstick, 8);
-    m_operatorButton9 = new JoystickButton(m_flightstick, 9);
-    m_operatorButton10 = new JoystickButton(m_flightstick, 10);
-    m_operatorButton11 = new JoystickButton(m_flightstick, 11);
-    m_operatorButton12 = new JoystickButton(m_flightstick, 12);
-  }
-
   private void bindCommands() {
     // Controller Bindings
-    m_toggleBrakeButton.onTrue(new InstantCommand(() -> m_driveSubsystem.SwitchBrakemode()));
+    m_controller1
+        .rightBumper()
+        .onTrue(new InstantCommand(() -> m_driveSubsystem.SwitchBrakemode()));
 
     // Intake
-    m_toggleIntakeButton.toggleOnTrue(
-        new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(1.0), m_intakeSubsystem));
+    m_controller1
+        .a()
+        .toggleOnTrue(
+            new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(1.0), m_intakeSubsystem));
     m_controller1
         .leftTrigger()
         .whileTrue(new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(-1.0), m_intakeSubsystem));
@@ -155,20 +122,25 @@ public class RobotContainer {
 
     // Fire Control Command (Bind to Trigger / Button 1 of flight stick)
     // Run at full speed (1.0) while trigger is held, rather than mapped to Y axis.
-    m_operatorDefaultButton.whileTrue(
-        new FireCommand(m_fireSubsystem, () -> 1.0, m_operatorDefaultButton));
+    m_flightstick
+        .button(Constants.JOYSTICK_DEFAULT_BUTTON)
+        .whileTrue(
+            new FireCommand(
+                m_fireSubsystem,
+                () -> 1.0,
+                m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON)));
 
     // Auto Aim Command (Bind to Button 2 of flight stick to toggle)
-    m_operatorButton2.toggleOnTrue(new AutoAimCommand(m_turretSubsystem, m_cameraSubsystem));
+    m_flightstick.button(2).toggleOnTrue(new AutoAimCommand(m_turretSubsystem, m_cameraSubsystem));
 
     // Turret Preset Orientations (Buttons 6 - 11)
     // Values are placeholders for raw motor rotations until gear ratio is determined.
-    m_operatorButton6.onTrue(new SetTurretPositionCommand(m_turretSubsystem, -0.5));
-    m_operatorButton7.onTrue(new SetTurretPositionCommand(m_turretSubsystem, -0.25));
-    m_operatorButton8.onTrue(new SetTurretPositionCommand(m_turretSubsystem, 0.0));
-    m_operatorButton9.onTrue(new SetTurretPositionCommand(m_turretSubsystem, 0.25));
-    m_operatorButton10.onTrue(new SetTurretPositionCommand(m_turretSubsystem, 0.5));
-    m_operatorButton11.onTrue(new SetTurretPositionCommand(m_turretSubsystem, 0.75));
+    m_flightstick.button(6).onTrue(new SetTurretPositionCommand(m_turretSubsystem, -90.0));
+    m_flightstick.button(7).onTrue(new SetTurretPositionCommand(m_turretSubsystem, -45.0));
+    m_flightstick.button(8).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 0.0));
+    m_flightstick.button(9).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 45.0));
+    m_flightstick.button(10).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 90.0));
+    m_flightstick.button(11).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 180.0));
 
     // Intake System
     // Bind fuzzy slider (Flightstick Throttle axis) to automatically control the Intake.
@@ -176,36 +148,7 @@ public class RobotContainer {
         new IntakeSliderCommand(m_intakeSubsystem, () -> m_flightstick.getThrottle()));
 
     // Emergency Unjam (Button 12)
-    m_operatorButton12.onTrue(new UnjamIntakeCommand(m_intakeSubsystem));
-
-    // TODO: Make Swerve code follow proper command-based structure
-    /*
-    drivebase.setDefaultCommand(
-        // We create a "RunCommand" (runs repeatedly)
-        Commands.run(
-            () -> {
-                // 1. Get Joystick Inputs (Inverted because Y is up-negative in computer graphics)
-                // MathUtil.applyDeadband ignores tiny drift when the stick is centered
-                double yVelocity = -MathUtil.applyDeadband(driverXbox.getLeftY(), 0.1);
-                double xVelocity = -MathUtil.applyDeadband(driverXbox.getLeftX(), 0.1);
-                double rotation  = -MathUtil.applyDeadband(driverXbox.getRightX(), 0.1);
-
-                // 2. Drive
-                drivebase.drive(
-                    new Translation2d(yVelocity * drivebase.maximumSpeed, xVelocity * drivebase.maximumSpeed),
-                    rotation * Math.PI,
-                    true // Field Relative (True = Standard, False = Robot Oriented)
-                );
-            },
-            drivebase // REQUIRE the subsystem so no other command can interrupt this one
-        )
-    );
-
-    // Map "Back" button to zero the gyro (reset field orientation)
-    if (drivebase.getSwerveDrive() != null) {
-      driverXbox.back().onTrue(Commands.runOnce(drivebase.getSwerveDrive()::zeroGyro, drivebase));
-    }
-      */
+    m_flightstick.button(12).onTrue(new UnjamIntakeCommand(m_intakeSubsystem));
   }
 
   private void initializeAutonomous() {
@@ -262,7 +205,7 @@ public class RobotContainer {
   }
 
   // for smart dashboard.
-  public Joystick getFlightStick() {
+  public CommandJoystick getFlightStick() {
     return this.m_flightstick;
   }
 

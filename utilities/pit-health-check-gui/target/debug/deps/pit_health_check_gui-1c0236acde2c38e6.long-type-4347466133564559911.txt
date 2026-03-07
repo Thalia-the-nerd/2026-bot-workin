@@ -1,0 +1,7 @@
+&url::Url: IntoClientRequest
+&std::string::String
+&tokio_tungstenite::tungstenite::http::Uri
+httparse::Request<'_, '_>
+std::string::String
+tokio_tungstenite::tungstenite::http::Request<()>
+tokio_tungstenite::tungstenite::http::Uri

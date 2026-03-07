@@ -14,8 +14,6 @@ import com.pathplanner.lib.path.Waypoint;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
-import com.revrobotics.sim.SparkMaxSim;
-import com.revrobotics.sim.SparkRelativeEncoderSim;
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
@@ -23,60 +21,39 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
-import edu.wpi.first.hal.SimDouble;
-import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.simulation.BatterySim;
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
-import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.Constants.CANConstants;
 import frc.robot.DriveConstants;
+import frc.robot.RobotTelemetry;
+import frc.robot.constants.Constants.CANConstants;
+import frc.robot.constants.SpeedConstants;
 import java.util.ArrayList;
 import java.util.List;
-import org.littletonrobotics.junction.Logger;
 
 /** This Subsystem is what allows the code to interact with the drivetrain of the robot. */
 public class DriveSubsystem extends SubsystemBase {
   // Gyro
   private final AHRS m_Gyro;
 
-  // simulation gyro
-  private final SimDouble SimGyroAngleHandler;
-
-  // motors
   private final SparkMax m_backLeft; // Main / Master Motor for Left
   private final SparkMax m_frontLeft; // Slave Motor for Left (Follow Master)
   private final SparkMax m_backRight; // Main / Master Motor for Right
   private final SparkMax m_frontRight; // Slave Motor for Right (Follow Master)
-  // Simulated Motors
-  private final DCMotor m_leftGearbox;
-  private final DCMotor m_rightGearbox;
-  private final SparkMaxSim m_leftSim;
-  private final SparkMaxSim m_rightSim;
 
-  // Simulated Drive Train
-  DifferentialDrivetrainSim m_driveTrainSim;
-
-  // Simulated Encoders
-  SparkRelativeEncoderSim m_leftEncoderSim;
-  SparkRelativeEncoderSim m_rightEncoderSim;
+  // Drive Simulation wrapper
+  private DriveSim m_driveSim;
 
   // Motor Configs
   private final SparkMaxConfig m_backLeftConfig = new SparkMaxConfig();
@@ -134,39 +111,10 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontLeft = new SparkMax(CANConstants.MOTOR_FRONT_LEFT_ID, SparkMax.MotorType.kBrushless);
     m_frontRight = new SparkMax(CANConstants.MOTOR_FRONT_RIGHT_ID, SparkMax.MotorType.kBrushless);
     m_backRight = new SparkMax(CANConstants.MOTOR_BACK_RIGHT_ID, SparkMax.MotorType.kBrushless);
-    // Create simulated motors
-    m_leftGearbox = DCMotor.getNEO(2);
-    m_rightGearbox = DCMotor.getNEO(2);
-    m_leftSim = new SparkMaxSim(m_backLeft, m_leftGearbox);
-    m_rightSim = new SparkMaxSim(m_backRight, m_rightGearbox);
 
-    // setup simulation for gyro
-    int gyroID = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[4]");
-    SimGyroAngleHandler = new SimDouble(SimDeviceDataJNI.getSimValueHandle(gyroID, "Yaw"));
-
-    // Create the simulation model of our drivetrain.
-    m_driveTrainSim =
-        new DifferentialDrivetrainSim(
-            // Create a linear system from our identification gains.
-            LinearSystemId.identifyDrivetrainSystem(
-                DriveConstants.kvDriveVoltSecondsPerMeter,
-                DriveConstants.kaDriveVoltSecondsSquaredPerMeter,
-                DriveConstants.kvDriveVoltSecondsPerMeterAngular,
-                DriveConstants.kaDriveVoltSecondsSquaredPerMeterAngular),
-            DCMotor.getNEO(2), // 2 NEO motors on each side of the drivetrain.
-            DriveConstants.GEAR_RATIO, // x to 1 gearing reduction
-            DriveConstants.kTrackwidthMeters, // Track Width
-            DriveConstants.WHEEL_RADIUS, // Wheel Radius
-            // The standard deviations for measurement noise:
-            // x and y:          0.001 m
-            // heading:          0.001 rad
-            // l and r velocity: 0.1   m/s
-            // l and r position: 0.005 m
-            VecBuilder.fill(0.001, 0.001, 0.001, 0.1, 0.1, 0.005, 0.005));
-
-    // setup simulated encoders
-    m_leftEncoderSim = new SparkRelativeEncoderSim(m_backLeft);
-    m_rightEncoderSim = new SparkRelativeEncoderSim(m_backRight);
+    if (RobotBase.isSimulation()) {
+      m_driveSim = new DriveSim(m_backLeft, m_backRight);
+    }
 
     // invert motors
     m_backRightConfig.inverted(true);
@@ -247,7 +195,7 @@ public class DriveSubsystem extends SubsystemBase {
           "WARNING: PathPlanner autoConfig is null! AutoBuilder was NOT configured.");
     }
 
-    SmartDashboard.putData("Field", field); // add field to dashboard
+    RobotTelemetry.putData("Field", field); // add field to dashboard
 
     // setup SysID for auto profiling
     m_sysIdRoutine =
@@ -256,7 +204,7 @@ public class DriveSubsystem extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("SysIdTestState", state.toString())),
+                (state) -> RobotTelemetry.recordOutput("SysIdTestState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> this.setVoltage(voltage, voltage),
                 null, // No log consumer, since data is recorded by URCL
@@ -351,7 +299,15 @@ public class DriveSubsystem extends SubsystemBase {
   // **tank drive = specific control style where two parallel forces of motion are controlled to
   // create linear and rotational motion
   public void tankDrive(double leftSpeed, double rightSpeed) {
-    m_ddrive.tankDrive(leftSpeed, rightSpeed);
+    double adjLeft =
+        SpeedConstants.adjustSpeed(
+            leftSpeed, SpeedConstants.FRONT_LEFT_MAX_SPEED, SpeedConstants.FRONT_LEFT_SENSITIVITY);
+    double adjRight =
+        SpeedConstants.adjustSpeed(
+            rightSpeed,
+            SpeedConstants.FRONT_RIGHT_MAX_SPEED,
+            SpeedConstants.FRONT_RIGHT_SENSITIVITY);
+    m_ddrive.tankDrive(adjLeft, adjRight);
   }
 
   /**
@@ -494,7 +450,7 @@ public class DriveSubsystem extends SubsystemBase {
     if (cameraEnabled) {
       m_driveOdometry.addVisionMeasurement(visionRobotPose, timestamp);
     }
-    Logger.recordOutput("PoseCamera" + cameraName, visionRobotPose);
+    RobotTelemetry.recordOutput("PoseCamera" + cameraName, visionRobotPose);
   }
 
   public void resetEncoders() {
@@ -609,43 +565,24 @@ public class DriveSubsystem extends SubsystemBase {
       gyroZeroPending = false;
     }
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("Average Distance Traveled", currentDistance());
-    SmartDashboard.putNumber("Current Gyro Yaw", getYaw());
-    SmartDashboard.putBoolean("Gyro Calibrating", m_Gyro.isCalibrating());
+    RobotTelemetry.putNumber("Average Distance Traveled", currentDistance());
+    RobotTelemetry.putNumber("Current Gyro Yaw", getYaw());
+    RobotTelemetry.putBoolean("Gyro Calibrating", m_Gyro.isCalibrating());
     // Update the odometry in the periodic block
     m_driveOdometry.update(getRotation2d(), getPositionLeft(), getPositionRight());
     field.setRobotPose(getPose());
-    Logger.recordOutput("RobotPose", getPose());
-    Logger.recordOutput("DriveLeftMotorPositionRotations", m_encoderBackLeft.getPosition());
-    Logger.recordOutput("DriveRightMotorPositionRotations", m_encoderBackRight.getPosition());
-    Logger.recordOutput("DriveLeftMotorVelocityRPM", m_encoderBackLeft.getVelocity());
-    Logger.recordOutput("DriveRightMotorVelocityRPM", m_encoderBackRight.getVelocity());
+    RobotTelemetry.recordOutput("RobotPose", getPose());
+    RobotTelemetry.recordOutput("DriveLeftMotorPositionRotations", m_encoderBackLeft.getPosition());
+    RobotTelemetry.recordOutput(
+        "DriveRightMotorPositionRotations", m_encoderBackRight.getPosition());
+    RobotTelemetry.recordOutput("DriveLeftMotorVelocityRPM", m_encoderBackLeft.getVelocity());
+    RobotTelemetry.recordOutput("DriveRightMotorVelocityRPM", m_encoderBackRight.getVelocity());
   }
 
   @Override
   public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-    // link motors to simulation
-    m_driveTrainSim.setInputs(
-        m_leftSim.getAppliedOutput() * RobotController.getInputVoltage(),
-        -m_rightSim.getAppliedOutput() * RobotController.getInputVoltage());
-    // Advance the model by 20 ms. Note that if you are running this
-    // subsystem in a separate thread or have changed the nominal timestep
-    // of TimedRobot, this value needs to match it.
-    m_driveTrainSim.update(0.02);
-    // update spark maxes
-    m_leftSim.iterate(
-        m_driveTrainSim.getLeftVelocityMetersPerSecond(), RoboRioSim.getVInVoltage(), 0.02);
-    m_rightSim.iterate(
-        m_driveTrainSim.getRightVelocityMetersPerSecond(), RoboRioSim.getVInVoltage(), 0.02);
-    // add load to battery
-    RoboRioSim.setVInVoltage(
-        BatterySim.calculateDefaultBatteryLoadedVoltage(m_driveTrainSim.getCurrentDrawAmps()));
-    // update sensors
-    SimGyroAngleHandler.set(-m_driveTrainSim.getHeading().getDegrees());
-    m_leftEncoderSim.setPosition(m_driveTrainSim.getLeftPositionMeters());
-    m_leftEncoderSim.setVelocity(m_driveTrainSim.getLeftVelocityMetersPerSecond());
-    m_rightEncoderSim.setPosition(m_driveTrainSim.getRightPositionMeters());
-    m_rightEncoderSim.setVelocity(m_driveTrainSim.getRightVelocityMetersPerSecond());
+    if (m_driveSim != null) {
+      m_driveSim.update();
+    }
   }
 }

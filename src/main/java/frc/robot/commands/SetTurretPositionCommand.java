@@ -5,12 +5,12 @@ import frc.robot.subsystems.TurretSubsystem;
 
 public class SetTurretPositionCommand extends Command {
   private final TurretSubsystem m_turret;
-  private final double m_targetRotations;
-  private final double m_tolerance = 0.05; // 1/20th of a rotation
+  private final double m_targetAngleDegrees;
+  private final double m_toleranceDegrees = 2.0;
 
-  public SetTurretPositionCommand(TurretSubsystem turret, double targetRotations) {
+  public SetTurretPositionCommand(TurretSubsystem turret, double targetAngleDegrees) {
     m_turret = turret;
-    m_targetRotations = targetRotations;
+    m_targetAngleDegrees = targetAngleDegrees;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(turret);
   }
@@ -18,7 +18,7 @@ public class SetTurretPositionCommand extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_turret.setTargetPosition(m_targetRotations);
+    m_turret.setTargetAngle(m_targetAngleDegrees);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -26,13 +26,13 @@ public class SetTurretPositionCommand extends Command {
   public void execute() {
     // The SparkMax built in PID will handle the movement automatically.
     // We optionally can continuously set the reference here just in case.
-    m_turret.setTargetPosition(m_targetRotations);
+    m_turret.setTargetAngle(m_targetAngleDegrees);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return m_turret.isAtPosition(m_targetRotations, m_tolerance);
+    return m_turret.isAtAngle(m_targetAngleDegrees, m_toleranceDegrees);
   }
 
   // Called once the command ends or is interrupted.

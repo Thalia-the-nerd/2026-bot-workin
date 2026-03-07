@@ -9,10 +9,10 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.CameraConstants;
 import frc.robot.Robot;
+import frc.robot.RobotTelemetry;
+import frc.robot.constants.CameraConstants;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -25,7 +25,6 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.simulation.VisionTargetSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 
-// TODO: Photon deprecated pose estimator
 public class CameraSubsystem extends SubsystemBase {
   private final DriveSubsystem m_driveSubsystem;
   public final AprilTagFieldLayout aprilTagFieldLayout;
@@ -131,7 +130,7 @@ public class CameraSubsystem extends SubsystemBase {
       // Camera processed a new frame since last
       // Get the last one in the list.
       var result = results.get(results.size() - 1);
-      SmartDashboard.putNumber("Front Camera Latency", result.getTimestampSeconds());
+      RobotTelemetry.putNumber("Front Camera Latency", result.getTimestampSeconds());
       if (result.hasTargets()) {
         // select last result with targets
         return Optional.of(result);
@@ -193,9 +192,9 @@ public class CameraSubsystem extends SubsystemBase {
     updateGlobalPose(poseCamera1, poseCamera1PoseEstimator, poseCamera1.getName());
     updateGlobalPose(poseCamera2, poseCamera2PoseEstimator, poseCamera2.getName());
     // Update dashboard
-    SmartDashboard.putBoolean("poseCamera1Connected", poseCamera1.isConnected());
-    SmartDashboard.putBoolean("poseCamera2Connected", poseCamera2.isConnected());
-    SmartDashboard.putBoolean("TargetingCamera1Connnected", targetingCamera1.isConnected());
+    RobotTelemetry.putBoolean("poseCamera1Connected", poseCamera1.isConnected());
+    RobotTelemetry.putBoolean("poseCamera2Connected", poseCamera2.isConnected());
+    RobotTelemetry.putBoolean("TargetingCamera1Connnected", targetingCamera1.isConnected());
   }
 
   private void updateState() {}

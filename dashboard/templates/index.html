@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --card-bg: #f9fafb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --black: #000;
+            --white: #fff;
+            --dark-gray: #374151;
+            --light-gray: #f3f4f6;
+            --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+
+        /* Black & White Theme Enforcements */
+        .theme-bw {
+            border: 2px solid var(--black);
+            background: var(--white);
+            color: var(--black);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 4px solid var(--black);
+        }
+
+        h1,
+        h2 {
+            margin: 0;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            font-weight: 800;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: 2px solid var(--black);
+        }
+
+        .status-connected {
+            background-color: var(--black);
+            color: var(--white);
+        }
+
+        .status-disconnected {
+            background-color: var(--white);
+            color: var(--black);
+            border-style: dashed;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            border: 3px solid var(--black);
+            padding: 1.5rem;
+            background-color: var(--white);
+            box-shadow: 6px 6px 0px var(--black);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px var(--black);
+        }
+
+        .card-header {
+            font-size: 1.25rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--black);
+            padding-bottom: 0.5rem;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed var(--dark-gray);
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .data-label {
+            color: var(--dark-gray);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        .data-value {
+            font-weight: 800;
+            font-family: monospace;
+            font-size: 1.125rem;
+        }
+
+        .value-jammed {
+            background-color: var(--black);
+            color: var(--white);
+            padding: 0.1rem 0.5rem;
+            animation: strobe 0.5s infinite;
+        }
+
+        @keyframes strobe {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Speed Configuration Section */
+        .settings-container {
+            border: 4px solid var(--black);
+            padding: 2rem;
+            margin-top: 2rem;
+            background-color: var(--light-gray);
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .setting-item label {
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .setting-item input {
+            padding: 0.5rem;
+            border: 2px solid var(--black);
+            font-family: monospace;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .setting-item input:focus {
+            outline: none;
+            background-color: var(--black);
+            color: var(--white);
+        }
+
+        .save-btn {
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background-color: var(--black);
+            color: var(--white);
+            border: none;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px var(--dark-gray);
+            font-size: 1.125rem;
+        }
+
+        .save-btn:hover {
+            background-color: var(--dark-gray);
+        }
+
+        .save-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--dark-gray);
+        }
+
+        .sync-stamp {
+            margin-left: 1rem;
+            font-family: monospace;
+            font-weight: normal;
+            color: var(--dark-gray);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>PROJECT 2026 // DASHBOARD</h1>
+        <div id="connection-status" class="status-badge status-disconnected">Checking Link...</div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Drive -->
+        <div class="card">
+            <div class="card-header">DRIVE CORE</div>
+            <div class="data-row"><span class="data-label">Avg Distance</span><span class="data-value"
+                    id="drive-dist">-.-- m</span></div>
+            <div class="data-row"><span class="data-label">Gyro Yaw</span><span class="data-value"
+                    id="drive-yaw">---.-°</span></div>
+            <div class="data-row"><span class="data-label">Calibrating</span><span class="data-value"
+                    id="drive-calibrating">-</span></div>
+        </div>
+
+        <!-- Intake -->
+        <div class="card">
+            <div class="card-header">INTAKE LOGIC</div>
+            <div class="data-row"><span class="data-label">Current Draw</span><span class="data-value"
+                    id="intake-current">-.-- A</span></div>
+            <div class="data-row"><span class="data-label">System State</span><span class="data-value"
+                    id="intake-jammed">-</span></div>
+        </div>
+
+        <!-- Turret & Fire -->
+        <div class="card">
+            <div class="card-header">WEAPON SYSTEMS</div>
+            <div class="data-row"><span class="data-label">Turret Pos</span><span class="data-value"
+                    id="turret-pos">-.-- rot</span></div>
+            <div class="data-row"><span class="data-label">Turret RPM</span><span class="data-value"
+                    id="turret-speed">----</span></div>
+            <div class="data-row"><span class="data-label">Muzzle RPM</span><span class="data-value"
+                    id="fire-speed">----</span></div>
+        </div>
+
+        <!-- Camera -->
+        <div class="card">
+            <div class="card-header">OPTICS</div>
+            <div class="data-row"><span class="data-label">Pose Cam A</span><span class="data-value"
+                    id="cam-pose1">-</span></div>
+            <div class="data-row"><span class="data-label">Pose Cam B</span><span class="data-value"
+                    id="cam-pose2">-</span></div>
+            <div class="data-row"><span class="data-label">Targeting</span><span class="data-value"
+                    id="cam-targeting">-</span></div>
+        </div>
+    </div>
+
+    <!-- Speed Constants Setup -->
+    <div class="settings-container">
+        <h2>PERFORMANCE CONSTANTS <span class="sync-stamp" id="sync-stamp">Syncing...</span></h2>
+
+        <form id="speeds-form">
+            <div class="settings-grid" id="speeds-grid">
+                <!-- Inputs injected by JS -->
+            </div>
+            <button type="button" class="save-btn" onclick="saveSpeeds()">COMMIT CONSTANTS [TX]</button>
+        </form>
+    </div>
+
+    <script>
+        const SPEED_KEYS = [
+            "FRONT_RIGHT_MAX_SPEED", "FRONT_RIGHT_SENSITIVITY",
+            "FRONT_LEFT_MAX_SPEED", "FRONT_LEFT_SENSITIVITY",
+            "INTAKE_MAIN_MAX_SPEED", "INTAKE_MAIN_SENSITIVITY",
+            "INTAKE_SECONDARY_MAX_SPEED", "INTAKE_SECONDARY_SENSITIVITY",
+            "LOADER_1_MAX_SPEED", "LOADER_1_SENSITIVITY",
+            "LOADER_2_MAX_SPEED", "LOADER_2_SENSITIVITY",
+            "LOADER_3_MAX_SPEED", "LOADER_3_SENSITIVITY",
+            "TURRET_MAX_SPEED", "TURRET_SENSITIVITY",
+            "FIRE_MAX_SPEED", "FIRE_SENSITIVITY"
+        ];
+
+        let pendingSaves = false;
+
+        function initSpeedInputs() {
+            const grid = document.getElementById('speeds-grid');
+            SPEED_KEYS.forEach(key => {
+                const title = key.replace(/_/g, ' ');
+                grid.innerHTML += `
+                    <div class="setting-item">
+                        <label>${title}</label>
+                        <input type="number" step="0.1" id="input-${key}" name="${key}" value="100.0" onchange="pendingSaves=true">
+                    </div>
+                `;
+            });
+            fetchSpeeds();
+            setInterval(fetchSpeeds, 1000); // Sync speeds every 1s
+        }
+
+        function fetchSpeeds() {
+            if (pendingSaves) return; // Don't overwrite if user is typing
+            fetch('/api/speeds')
+                .then(res => res.json())
+                .then(data => {
+                    SPEED_KEYS.forEach(key => {
+                        const input = document.getElementById(`input-${key}`);
+                        if (input && document.activeElement !== input) {
+                            input.value = Number(data[key] || 100).toFixed(1);
+                        }
+                    });
+                    document.getElementById('sync-stamp').textContent = `RX: ${new Date().toLocaleTimeString()}`;
+                });
+        }
+
+        function saveSpeeds() {
+            const payload = {};
+            SPEED_KEYS.forEach(key => {
+                const el = document.getElementById(`input-${key}`);
+                if (el) payload[key] = parseFloat(el.value);
+            });
+
+            document.getElementById('sync-stamp').textContent = `TXING...`;
+            fetch('/api/speeds', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(res => res.json()).then(data => {
+                pendingSaves = false;
+                document.getElementById('sync-stamp').textContent = `TX ACK: [${data.count}] ${new Date().toLocaleTimeString()}`;
+                fetchSpeeds();
+            });
+        }
+
+        function updateHealth() {
+            fetch('/api/health')
+                .then(response => response.json())
+                .then(data => {
+                    const statusEl = document.getElementById('connection-status');
+                    statusEl.textContent = data.has_ntcore ? (data.status === 'connected' ? 'UPLINK OK' : 'NO UPLINK') : 'SIM UPLINK';
+                    statusEl.className = 'status-badge ' + (data.status === 'connected' || !data.has_ntcore ? 'status-connected' : 'status-disconnected');
+
+                    const fmtBool = (val, t, f) => val ? t : f;
+
+                    document.getElementById('drive-dist').textContent = data.health.drive.average_distance.toFixed(2) + ' m';
+                    document.getElementById('drive-yaw').textContent = data.health.drive.gyro_yaw.toFixed(1) + '°';
+                    document.getElementById('drive-calibrating').textContent = fmtBool(data.health.drive.gyro_calibrating, 'ACTIVE', 'IDLE');
+
+                    document.getElementById('intake-current').textContent = data.health.intake.current_amps.toFixed(2) + ' A';
+                    const jamSpan = document.getElementById('intake-jammed');
+                    if (data.health.intake.jammed) jamSpan.innerHTML = '<span class="value-jammed">JAMMED</span>';
+                    else jamSpan.textContent = 'NOMINAL';
+
+                    document.getElementById('turret-pos').textContent = data.health.turret.position_rotations.toFixed(2) + ' R';
+                    document.getElementById('turret-speed').textContent = Math.round(data.health.turret.speed_rpm) + ' RPM';
+                    document.getElementById('fire-speed').textContent = Math.round(data.health.fire_control.speed_rpm) + ' RPM';
+
+                    document.getElementById('cam-pose1').textContent = fmtBool(data.health.cameras.pose1_connected, 'ONLINE', 'OFFLINE');
+                    document.getElementById('cam-pose2').textContent = fmtBool(data.health.cameras.pose2_connected, 'ONLINE', 'OFFLINE');
+                    document.getElementById('cam-targeting').textContent = fmtBool(data.health.cameras.targeting_connected, 'ONLINE', 'OFFLINE');
+                });
+        }
+
+        initSpeedInputs();
+        updateHealth();
+        setInterval(updateHealth, 200); // 5Hz health update
+    </script>
+</body>
+
+</html>
