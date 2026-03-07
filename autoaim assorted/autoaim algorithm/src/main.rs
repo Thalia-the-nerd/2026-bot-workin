@@ -113,8 +113,26 @@ async fn main() {
     // Projectile pool
     let mut projectiles: Vec<Projectile> = vec![];
 
+    // Camera state
+    let mut cam_yaw: f32 = robot_yaw;
+    let mut cam_pitch: f32 = 0.5; // rad up from horizontal
+    let mut cam_dist: f32 = 12.0;
+
     loop {
         let dt = get_frame_time();
+
+        // =================================================================
+        // 0. CAMERA INPUTS (Mouse Pan & Zoom)
+        // =================================================================
+        let mouse_delta = mouse_delta_position();
+        if is_mouse_button_down(MouseButton::Right) || is_mouse_button_down(MouseButton::Left) {
+            cam_yaw -= mouse_delta.x * 2.0;
+            cam_pitch += mouse_delta.y * 2.0;
+            cam_pitch = cam_pitch.clamp(0.1, PI / 2.0 - 0.1); // prevent flipping
+        }
+        let (_, scroll_y) = mouse_wheel();
+        cam_dist -= scroll_y * 1.5;
+        cam_dist = cam_dist.clamp(3.0, 50.0);
 
         // =================================================================
         // 1. DRIVING INPUTS (XZ plane movement)
@@ -142,11 +160,8 @@ async fn main() {
         }
 
         // =================================================================
-        // 2. AUTOAIM TARGETING (direct 3D calculation)
+        // 2. AUTOAIM TARGETING (direct 3D quadratic lead solver)
         // =================================================================
-        // Instead of using the 2D lib.rs intermediary (which double-counts
-        // momentum), we compute everything directly in 3D here.
-        //
         // The target's designated front face center (in world space):
         let face_offset_x = (TARGET_SIZE / 2.0) * target_rot.cos();
         let face_offset_z = (TARGET_SIZE / 2.0) * target_rot.sin();
@@ -160,34 +175,54 @@ async fn main() {
         let face_normal_x = target_rot.cos();
         let face_normal_z = target_rot.sin();
 
-        // Vector from face center to robot (on XZ plane)
+        // Check line of sight from robot
         let to_robot_x = robot_x - face_center.x;
         let to_robot_z = robot_z - face_center.z;
+        let can_hit = (to_robot_x * face_normal_x + to_robot_z * face_normal_z) > 0.0;
 
-        // Dot product: is the robot in front of the face?
-        let dot = to_robot_x * face_normal_x + to_robot_z * face_normal_z;
-        let can_hit = dot > 0.0;
+        // Current actual position of the barrel tip given CURRENT turret_yaw
+        let spawn_x = robot_x + turret_yaw.cos() * 1.5;
+        let spawn_z = robot_z + turret_yaw.sin() * 1.5;
 
-        // XZ distance from robot to face center
-        let dx = face_center.x - robot_x;
-        let dz = face_center.z - robot_z;
-        let dist_xz = (dx * dx + dz * dz).sqrt();
+        // XZ distance from barrel tip to face center
+        let dx = face_center.x - spawn_x;
+        let dz = face_center.z - spawn_z;
 
-        // Desired turret yaw = direction to face center on XZ plane
-        let desired_yaw = dz.atan2(dx);
+        // Quadratic physical lead solver for exact time of flight (t) 
+        // assuming fixed muzzle speed.
+        // v_muzzle^2 * t^2 = (dx - vx * t)^2 + (dz - vz * t)^2
+        // a*t^2 + b*t + c = 0
+        let v_muzzle = PROJECTILE_SPEED;
+        let a = v_muzzle * v_muzzle - robot_vx * robot_vx - robot_vz * robot_vz;
+        let b = 2.0 * (dx * robot_vx + dz * robot_vz);
+        let c = -(dx * dx + dz * dz);
 
-        // Time of flight (horizontal traversal at PROJECTILE_SPEED)
-        let t_flight = if dist_xz > 0.01 { dist_xz / PROJECTILE_SPEED } else { 0.1 };
+        let mut desired_yaw = turret_yaw;
+        let mut best_t = 0.1;
+        
+        let discriminant = b * b - 4.0 * a * c;
+        if discriminant >= 0.0 {
+            let t1 = (-b + discriminant.sqrt()) / (2.0 * a);
+            let t2 = (-b - discriminant.sqrt()) / (2.0 * a);
+            
+            // Choose the smallest positive root (earliest hit)
+            best_t = if t1 > 0.0 && t2 > 0.0 { t1.min(t2) } else if t1 > 0.0 { t1 } else { t2 };
+            // Compute the target relative exit velocity direction
+            if best_t > 0.0 {
+                let req_vx_rel = dx / best_t - robot_vx;
+                let req_vz_rel = dz / best_t - robot_vz;
+                desired_yaw = req_vz_rel.atan2(req_vx_rel);
+            }
+        }
 
-        // Required vertical launch velocity to arc to target height under gravity
-        // Using: dy = vy*t - 0.5*g*t^2  =>  vy = (dy + 0.5*g*t^2) / t
+        // Required vertical velocity from this spawn pos to hit target height 
+        // at the precise time `best_t`
         let dy = face_center.y - ROBOT_HEIGHT;
-        let vy_launch = (dy + 0.5 * GRAVITY * t_flight * t_flight) / t_flight;
+        let vy_launch = (dy + 0.5 * GRAVITY * best_t * best_t) / best_t;
 
-        // RPM estimation (for HUD display)
-        let fire_speed_horiz = PROJECTILE_SPEED;
-        let fire_speed_total = (fire_speed_horiz * fire_speed_horiz + vy_launch * vy_launch).sqrt();
-        let current_distance = dist_xz as f64;
+        // HUD variables
+        let current_distance = (dx * dx + dz * dz).sqrt() as f64;
+        let fire_speed_total = (v_muzzle * v_muzzle + vy_launch * vy_launch).sqrt();
         let current_rpm = (fire_speed_total * 2.15) as f64;
 
         // =================================================================
@@ -224,35 +259,40 @@ async fn main() {
         if turret_yaw < -PI { turret_yaw += 2.0 * PI; }
 
         // =================================================================
-        // 4. FIRE PROJECTILE (Spacebar) — exact 3D ballistic calculation
+        // 4. FIRE PROJECTILE (Spacebar) — strict physically accurate shot
         // =================================================================
-        // We compute the EXACT world-space velocity vector that will make the
-        // projectile arrive at the face center, accounting for gravity and
-        // the robot's current momentum.
-        //
-        // World velocity needed:
-        //   vx_world = dx / t_flight
-        //   vz_world = dz / t_flight
-        //   vy_world = (dy + 0.5 * g * t^2) / t
-        //
-        // The ball inherits the robot's velocity, so the turret only fires
-        // the DIFFERENCE. But we store final world velocity for the projectile.
-        if is_key_pressed(KeyCode::Space) && can_hit {
-            // Exact world-space velocity to reach the face center
-            let world_vx = dx / t_flight;
-            let world_vz = dz / t_flight;
+        // Here we perfectly combine the inherited robot velocity with the 
+        // turret's relative muzzle velocity. No magnet effects—it strictly
+        // relies on the turret having rotated to the correct `desired_yaw` 
+        // lead calculated by the quadratic solver above.
+        let is_locked = can_hit && (desired_yaw - turret_yaw).abs() < 0.05;
 
-            // Add robot momentum: the projectile in world space moves at
-            // robot_velocity + turret_exit_velocity.
-            // Since world_vx/vz is the TOTAL needed world velocity,
-            // we use it directly (it's what the ball needs in world coords).
-            // Robot momentum is already "baked in" because the ball leaves
-            // the robot: if robot moves right, the ball also moves right,
-            // so the turret must aim slightly left. We handle this by 
-            // using the world velocity directly.
-            let final_vx = world_vx;
-            let final_vz = world_vz;
-            let final_vy = vy_launch;
+        if is_key_pressed(KeyCode::Space) && can_hit {
+            let spawn_pos = vec3(
+                robot_x + turret_yaw.cos() * 1.5,
+                ROBOT_HEIGHT,
+                robot_z + turret_yaw.sin() * 1.5,
+            );
+            
+            // Relative muzzle velocity is pointed strictly exactly where the turret faces
+            let rel_vx = turret_yaw.cos() * PROJECTILE_SPEED;
+            let rel_vz = turret_yaw.sin() * PROJECTILE_SPEED;
+            
+            // World horizontal velocity (inherited)
+            let final_vx = robot_vx + rel_vx;
+            let final_vz = robot_vz + rel_vz;
+
+            // Compute exact vertical launch velocity using actual firing vector
+            let dx_fire = face_center.x - spawn_pos.x;
+            let dz_fire = face_center.z - spawn_pos.z;
+            
+            let speed_xz = (final_vx * final_vx + final_vz * final_vz).sqrt();
+            let dist_xz = (dx_fire * dx_fire + dz_fire * dz_fire).sqrt();
+            let mut t_flight = dist_xz / speed_xz.max(0.1);
+            t_flight = t_flight.max(0.01); 
+            
+            let dy_fire = face_center.y - ROBOT_HEIGHT;
+            let final_vy = (dy_fire + 0.5 * GRAVITY * t_flight * t_flight) / t_flight;
 
             let spawn_pos = vec3(
                 robot_x + turret_yaw.cos() * 1.5,
@@ -387,13 +427,10 @@ async fn main() {
         clear_background(Color::new(0.15, 0.15, 0.2, 1.0));
 
         // --- 3D CAMERA ---
-        // Follow camera positioned behind and above the robot
-        let cam_dist = 12.0;
-        let cam_height = 8.0;
         let cam_pos = vec3(
-            robot_x - robot_yaw.cos() * cam_dist,
-            cam_height,
-            robot_z - robot_yaw.sin() * cam_dist,
+            robot_x - cam_yaw.cos() * cam_pitch.cos() * cam_dist,
+            ROBOT_HEIGHT + cam_pitch.sin() * cam_dist,
+            robot_z - cam_yaw.sin() * cam_pitch.cos() * cam_dist,
         );
         let cam_target = vec3(robot_x, ROBOT_HEIGHT, robot_z);
 
@@ -531,8 +568,8 @@ async fn main() {
         draw_text("Autoaim 3D Simulation", 10.0, 30.0, 24.0, WHITE);
         draw_text("========================", 10.0, 50.0, 20.0, GRAY);
 
-        let hud_color = if can_hit { GREEN } else { RED };
-        let lock_str = if can_hit { "LOCKED" } else { "NO SIGHTLINE" };
+        let hud_color = if is_locked { GREEN } else if can_hit { YELLOW } else { RED };
+        let lock_str = if is_locked { "LOCKED (READY)" } else if can_hit { "TRACKING" } else { "NO SIGHTLINE" };
 
         draw_text(&format!("Target: {}", lock_str), 10.0, 80.0, 20.0, hud_color);
         draw_text(&format!("Distance:  {:.2} m", current_distance), 10.0, 110.0, 20.0, WHITE);
@@ -544,9 +581,10 @@ async fn main() {
         draw_text("Controls:", 10.0, 260.0, 20.0, WHITE);
         draw_text("[WASD]  Drive Chassis", 10.0, 285.0, 18.0, LIGHTGRAY);
         draw_text("[SPACE] Fire Projectile", 10.0, 310.0, 18.0, LIGHTGRAY);
+        draw_text("[MOUSE] Drag to orbit, scroll zoom", 10.0, 335.0, 18.0, LIGHTGRAY);
 
-        draw_text(&format!("Projectiles: {}", projectiles.len()), 10.0, 350.0, 18.0, YELLOW);
-        draw_text(&format!("FPS: {}", get_fps()), 10.0, 375.0, 18.0, GRAY);
+        draw_text(&format!("Projectiles: {}", projectiles.len()), 10.0, 370.0, 18.0, YELLOW);
+        draw_text(&format!("FPS: {}", get_fps()), 10.0, 395.0, 18.0, GRAY);
 
         next_frame().await
     }
