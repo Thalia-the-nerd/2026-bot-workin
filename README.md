@@ -157,6 +157,38 @@ Test the code without a physical robot:
 
 <p align="right"><a href="#readme-top">Back to top</a></p>
 
+## System Architecture
+
+### Auto Aim Pipeline
+```mermaid
+graph TD
+  A[DriveSubsystem] -->|Odometry Pose2d| C(AutoAimCalculations)
+  B[CameraSubsystem] -->|Target Pose3d| C
+  C -->|Calculate Quadratic Lead| D{AimResult}
+  D -->|Robot-Relative Yaw| E[ProfiledPIDController]
+  E -->|PID Output| G{Voltage Sum}
+  F[SimpleMotorFeedforward] -->|FF Output| G
+  G -->|setVoltage| H((Turret Motor))
+
+  classDef default fill:#1e1e1e,stroke:#333,stroke-width:2px,color:#fff;
+  classDef node fill:#2b2d42,stroke:#8d99ae,stroke-width:2px,color:#fff;
+  class A,B,C,D,E,F,G,H node;
+```
+
+### Fire Control State Machine
+```mermaid
+stateDiagram-v2
+  [*] --> SpinUp: Trigger Held
+  SpinUp --> SpinUp: Flywheel RPM < Target RPM
+  SpinUp --> Feed: Flywheel RPM >= Target RPM
+  Feed --> Feed: RPM Maintained
+  Feed --> SpinUp: RPM Drops Below Target
+  Feed --> [*]: Trigger Released
+  SpinUp --> [*]: Trigger Released
+```
+
+<p align="right"><a href="#readme-top">Back to top</a></p>
+
 ---
 
 ## Documentation
