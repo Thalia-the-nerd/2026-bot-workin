@@ -157,3 +157,20 @@ impl TweaksApp {
         }
     }
 }
+
+impl TweaksApp {
+    fn drain_nt(&mut self) {
+        let mut rx = self.nt_rx.lock().unwrap();
+        while let Ok(msg) = rx.try_recv() {
+            match msg {
+                NtMsg::Tweak(id, s) => { if let Some(t) = self.tweaks.iter_mut().find(|x| x.id == id) { t.state = s; } }
+                NtMsg::Const(id, v) => {
+                    if let Some(s) = self.speed_settings.iter_mut().find(|x| x.id == id) { s.value = v; }
+                    if let Some(s) = self.pid_settings.iter_mut().find(|x| x.id == id) { s.value = v; }
+                }
+                NtMsg::Telem(t) => { *self.telemetry.lock().unwrap() = t; }
+                NtMsg::Auto(i) => { self.auto_idx = i; }
+            }
+        }
+    }
+}
