@@ -48,3 +48,14 @@ fn default_tweaks() -> Vec<Tweak> {
     ];
     ids.iter().map(|id| Tweak { id: id.to_string(), state: false }).collect()
 }
+
+fn category_of(id: &str) -> usize {
+    if id.contains("drive") { 0 }
+    else if id.contains("turret") { 1 }
+    else { 2 }
+}
+
+fn group_prefix(id: &str) -> &str {
+    let parts: Vec<&str> = id.split('_').collect();
+    if parts.len() > 1 { parts[0] } else { id }
+}
