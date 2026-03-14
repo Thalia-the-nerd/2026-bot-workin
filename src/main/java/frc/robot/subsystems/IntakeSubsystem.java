@@ -35,6 +35,9 @@ public class IntakeSubsystem extends SubsystemBase {
     // Usually intakes run in Coast so balls/notes aren't crushed on stop.
     m_config.idleMode(SparkMaxConfig.IdleMode.kCoast);
 
+    // Hardware smoothing to limit sharp spikes
+    m_config.openLoopRampRate(0.25);
+
     m_intakeMotorMain.configure(
         m_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 

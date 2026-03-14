@@ -161,6 +161,7 @@ Test the code without a physical robot:
 
 ### Auto Aim Pipeline
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'background': '#11111b', 'primaryColor': '#1e1e2e', 'primaryBorderColor': '#cba6f7', 'primaryTextColor': '#cdd6f4', 'lineColor': '#89b4fa', 'edgeLabelBackground': '#11111b', 'labelColor': '#cdd6f4'}}}%%
 graph TD
   A[DriveSubsystem] -->|Odometry Pose2d| C(AutoAimCalculations)
   B[CameraSubsystem] -->|Target Pose3d| C
@@ -170,13 +171,15 @@ graph TD
   F[SimpleMotorFeedforward] -->|FF Output| G
   G -->|setVoltage| H((Turret Motor))
 
-  classDef default fill:#1e1e1e,stroke:#333,stroke-width:2px,color:#fff;
-  classDef node fill:#2b2d42,stroke:#8d99ae,stroke-width:2px,color:#fff;
-  class A,B,C,D,E,F,G,H node;
+  classDef default fill:#1e1e2e,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4,rx:10,ry:10;
+  classDef highlight fill:#11111b,stroke:#89b4fa,stroke-width:2px,color:#89dceb,rx:10,ry:10;
+  class A,B,F default;
+  class C,D,E,G,H highlight;
 ```
 
 ### Fire Control State Machine
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'background': '#11111b', 'primaryColor': '#1e1e2e', 'primaryBorderColor': '#cba6f7', 'primaryTextColor': '#cdd6f4', 'lineColor': '#89b4fa', 'edgeLabelBackground': '#11111b', 'labelColor': '#cdd6f4'}}}%%
 stateDiagram-v2
   [*] --> SpinUp: Trigger Held
   SpinUp --> SpinUp: Flywheel RPM < Target RPM
@@ -185,6 +188,10 @@ stateDiagram-v2
   Feed --> SpinUp: RPM Drops Below Target
   Feed --> [*]: Trigger Released
   SpinUp --> [*]: Trigger Released
+
+  classDef custom fill:#1e1e2e,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4,font-weight:bold
+  class SpinUp custom
+  class Feed custom
 ```
 
 <p align="right"><a href="#readme-top">Back to top</a></p>

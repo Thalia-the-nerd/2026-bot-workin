@@ -5,6 +5,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.constants.Constants.CANConstants;
 import frc.robot.constants.SpeedConstants;
@@ -17,6 +18,8 @@ public class LoaderSubsystem extends SubsystemBase {
   private final SparkMax m_loaderMotor3;
   private final SparkMaxConfig m_config;
 
+  private final SlewRateLimiter m_speedLimiter;
+
   public LoaderSubsystem() {
     m_loaderMotor1 = new SparkMax(CANConstants.MOTOR_LOADER_1_ID, MotorType.kBrushless);
     m_loaderMotor2 = new SparkMax(CANConstants.MOTOR_LOADER_2_ID, MotorType.kBrushless);
@@ -25,6 +28,9 @@ public class LoaderSubsystem extends SubsystemBase {
 
     // Default to Coast mode or Brake mode depending on team preference.
     m_config.idleMode(SparkMaxConfig.IdleMode.kCoast);
+
+    // Hardware-level Torque Smoothing for voltage spikes
+    m_config.openLoopRampRate(0.25);
 
     // Apply configuration to main motor
     m_loaderMotor1.configure(
@@ -38,6 +44,9 @@ public class LoaderSubsystem extends SubsystemBase {
 
     m_loaderMotor3.configure(
         m_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    // Software Slew Rate Limiter for manual inputs (acceleration cap: full speed in 0.5s)
+    m_speedLimiter = new SlewRateLimiter(2.0);
   }
 
   /**
@@ -47,14 +56,16 @@ public class LoaderSubsystem extends SubsystemBase {
    */
   public void setLoaderSpeed(double speed) {
     double adjustedSpeed =
-        SpeedConstants.adjustSpeed(
-            speed, SpeedConstants.LOADER_1_MAX_SPEED, SpeedConstants.LOADER_1_SENSITIVITY);
+        m_speedLimiter.calculate(
+            SpeedConstants.adjustSpeed(
+                speed, SpeedConstants.LOADER_1_MAX_SPEED, SpeedConstants.LOADER_1_SENSITIVITY));
     m_loaderMotor1.set(adjustedSpeed);
   }
 
   /** Stops the loader. */
   public void stop() {
     m_loaderMotor1.stopMotor();
+    m_speedLimiter.reset(0);
   }
 
   @Override

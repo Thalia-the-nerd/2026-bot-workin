@@ -1,23 +1,42 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.CameraSubsystem;
+import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.utils.AutoAimCalculations;
 
 public class AutoAimCommand extends Command {
   private final TurretSubsystem m_turret;
   private final CameraSubsystem m_camera;
+  private final DriveSubsystem m_drive;
 
-  // A simple Proportional controller to turn the turret based on AprilTag Yaw
-  private final PIDController m_yawController = new PIDController(0.015, 0, 0);
+  // Profiled PID for incredibly smooth tracking
+  private final ProfiledPIDController m_yawController =
+      new ProfiledPIDController(
+          4.5, 0.0, 0.1, new TrapezoidProfile.Constraints(6.0, 8.0)); // Rad/s and Rad/s/s
 
-  public AutoAimCommand(TurretSubsystem turret, CameraSubsystem camera) {
+  // Feedforward for smooth following
+  private final SimpleMotorFeedforward m_feedforward = new SimpleMotorFeedforward(0.1, 0.5);
+
+  // Hardcoded target pose (From CameraSubsystem.java where TargetModel is defined)
+  private final Pose3d m_targetPose = new Pose3d(16, 4, 2, new Rotation3d(0, 0, Math.PI));
+  private final double m_turretHeight = 0.5; // Roughly match Rust Sim
+
+  public AutoAimCommand(TurretSubsystem turret, CameraSubsystem camera, DriveSubsystem drive) {
     m_turret = turret;
     m_camera = camera;
+    m_drive = drive;
 
-    // Set tolerance (in degrees) for when we consider the turret "aimed"
-    m_yawController.setTolerance(1.0);
+    // Turret wraps around so we make it continuous between -Pi and Pi
+    m_yawController.enableContinuousInput(-Math.PI, Math.PI);
+    m_yawController.setTolerance(Math.toRadians(1.0));
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(turret);
@@ -27,26 +46,31 @@ public class AutoAimCommand extends Command {
   @Override
   public void initialize() {
     System.out.println("AutoAimCommand Scheduled - Handing over to AutoAim");
+    m_yawController.reset(m_turret.getTurretAngleRadians());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // Check if the camera sees a target
-    if (m_camera.targetingCamera1Result.isPresent()
-        && m_camera.targetingCamera1Result.get().hasTargets()) {
-      // Get the best target's yaw (horizontal offset from center of camera in degrees)
-      double yaw = m_camera.targetingCamera1Result.get().getBestTarget().getYaw();
+    // 1) Get current state from odometry
+    Pose2d robotPose = m_drive.getPose();
 
-      // Calculate motor output to turn the turret towards the target (0 degrees yaw)
-      double output = m_yawController.calculate(yaw, 0.0);
+    // 2) Get optimal lead (yaw + RPM) from Rust algorithm port
+    AutoAimCalculations.AimResult result =
+        AutoAimCalculations.calculateLead(
+            m_drive.getSpeeds(), robotPose, m_targetPose, m_turretHeight);
 
-      // Invert output if the camera is mounted such that positive yaw requires negative motor power
-      m_turret.setTurretSpeed(-output);
-    } else {
-      // If we lose sight of the target, stop moving
-      m_turret.stop();
-    }
+    // 3) Calculate tracking using profiled PID and feedforward
+    double currentAngle = m_turret.getTurretAngleRadians();
+
+    // Field-relative desired yaw to robot-relative: subtract the robot's heading
+    double robotRelativeDesiredYaw = result.desiredYaw - robotPose.getRotation().getRadians();
+
+    double pidOut = m_yawController.calculate(currentAngle, robotRelativeDesiredYaw);
+    double ffOut = m_feedforward.calculate(m_yawController.getSetpoint().velocity);
+
+    // 4) Apply voltage
+    m_turret.setTurretVoltage(pidOut + ffOut);
   }
 
   // Returns true when the command should end.

@@ -8,10 +8,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public final class SpeedConstants {
   // Drive Train (Back motors linked to front)
-  public static double FRONT_RIGHT_MAX_SPEED = 100.0;
+  public static double FRONT_RIGHT_MAX_SPEED = 85.0; // Reduced from 100 to 75
   public static double FRONT_RIGHT_SENSITIVITY = 100.0;
 
-  public static double FRONT_LEFT_MAX_SPEED = 100.0;
+  public static double FRONT_LEFT_MAX_SPEED = 85.0; // Reduced from 100 to 75
   public static double FRONT_LEFT_SENSITIVITY = 100.0;
 
   // Intake Subsystem
@@ -32,13 +32,14 @@ public final class SpeedConstants {
   public static double LOADER_3_SENSITIVITY = 100.0;
 
   // Turret Subsystem
-  public static double TURRET_MAX_SPEED = 100.0;
-  public static double TURRET_SENSITIVITY = 100.0;
+  public static double TURRET_MAX_SPEED = 50.0;
+  public static double TURRET_SENSITIVITY = 30.0;
 
   // Fire Subsystem
   public static double FIRE_MAX_SPEED = 100.0;
   public static double FIRE_SENSITIVITY = 100.0;
 
+  public static boolean TUNING_MODE = false;
   private static boolean initialized = false;
 
   public static void syncNetworkTables() {
@@ -62,7 +63,7 @@ public final class SpeedConstants {
       SmartDashboard.putNumber("Speed/FIRE_MAX_SPEED", FIRE_MAX_SPEED);
       SmartDashboard.putNumber("Speed/FIRE_SENSITIVITY", FIRE_SENSITIVITY);
       initialized = true;
-    } else {
+    } else if (TUNING_MODE) {
       FRONT_RIGHT_MAX_SPEED =
           SmartDashboard.getNumber("Speed/FRONT_RIGHT_MAX_SPEED", FRONT_RIGHT_MAX_SPEED);
       FRONT_RIGHT_SENSITIVITY =
