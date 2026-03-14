@@ -87,3 +87,19 @@ fn parse_doubles(path: &str) -> HashMap<String, f64> {
     }
     map
 }
+
+fn rewrite_booleans(path: &str, tweaks: &[Tweak]) {
+    let mut out = String::new();
+    for t in tweaks {
+        out.push_str(&format!("{}={}\n", t.id, t.state));
+    }
+    let _ = fs::write(path, out);
+}
+
+fn rewrite_doubles(path: &str, speed: &[NumSetting], pid: &[NumSetting]) {
+    let mut out = String::new();
+    for s in speed.iter().chain(pid) {
+        out.push_str(&format!("{}={}\n", s.id, s.value));
+    }
+    let _ = fs::write(path, out);
+}
