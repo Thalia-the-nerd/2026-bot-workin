@@ -253,3 +253,11 @@ fn main() -> eframe::Result {
         Box::new(|cc| Ok(Box::new(TweaksApp::new(cc)))),
     )
 }
+
+impl TweaksApp {
+    fn draw_footer(&mut self, ui: &mut Ui) {
+        ui.with_layout(Layout::right_to_left(Align::Max), |ui| {
+            ui.label(RichText::new("built by thalia  //  project cerberus 2026").monospace().size(9.0).color(Color32::from_rgb(60, 60, 60)));
+        });
+    }
+}
