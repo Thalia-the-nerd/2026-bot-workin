@@ -20,3 +20,18 @@ struct NumSetting {
     value: f64,
     is_pid: bool,
 }
+
+#[derive(Default, Clone)]
+struct Telemetry {
+    battery: f64,
+    turret_rpm: f64,
+    heading: f64,
+    connected: bool,
+}
+
+enum NtMsg {
+    Tweak(String, bool),
+    Const(String, f64),
+    Telem(Telemetry),
+    Auto(usize),
+}
