@@ -6,18 +6,17 @@ A comprehensive analysis of the languages that power this codebase.
 
 ```mermaid
 pie title Language Distribution (by Line Count)
-    "C++ Headers" : 167076
-    "Rust Lockfile" : 5146
-    "Other" : 3626
-    "Java" : 3208
-    "Markdown" : 1023
+    "Rust Lockfile" : 9825
+    "Java" : 4283
+    "Rust" : 1724
+    "Other" : 1145
+    "Markdown" : 1065
     "Python" : 946
-    "C++ Source" : 942
-    "Rust" : 875
     "JSON" : 856
     "Gradle" : 198
-    "TOML" : 31
-    "Shell" : 18
+    "C++ Source" : 67
+    "TOML" : 50
+    "C++ Headers" : 42
     "YAML" : 5
 ```
 
@@ -25,18 +24,17 @@ pie title Language Distribution (by Line Count)
 
 | Language | Extensions | File Count | Line Count |
 | :--- | :--- | :--- | :--- |
-| **C++ Headers** | `.h, .hpp, .inc` | 324 | 167,076 |
-| **Rust Lockfile** | `.lock` | 2 | 5,146 |
-| **Other** | `.bat, .gitignore, .html, .jar, .properties, .txt` | 14 | 3,626 |
-| **Java** | `.java` | 32 | 3,208 |
-| **Markdown** | `.md` | 9 | 1,023 |
+| **Rust Lockfile** | `.lock` | 3 | 9,825 |
+| **Java** | `.java` | 42 | 4,283 |
+| **Rust** | `.rs` | 4 | 1,724 |
+| **Other** | `.bat, .gitignore, .html, .jar, .properties, .txt` | 12 | 1,145 |
+| **Markdown** | `.md` | 10 | 1,065 |
 | **Python** | `.py` | 7 | 946 |
-| **C++ Source** | `.cpp` | 2 | 942 |
-| **Rust** | `.rs` | 3 | 875 |
 | **JSON** | `.json` | 20 | 856 |
 | **Gradle** | `.gradle` | 2 | 198 |
-| **TOML** | `.toml` | 2 | 31 |
-| **Shell** | `.sh` | 1 | 18 |
+| **C++ Source** | `.cpp` | 1 | 67 |
+| **TOML** | `.toml` | 3 | 50 |
+| **C++ Headers** | `.h` | 1 | 42 |
 | **YAML** | `.yml` | 1 | 5 |
 
 
