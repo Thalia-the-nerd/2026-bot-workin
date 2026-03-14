@@ -103,3 +103,19 @@ fn rewrite_doubles(path: &str, speed: &[NumSetting], pid: &[NumSetting]) {
     }
     let _ = fs::write(path, out);
 }
+
+async fn spawn_nt_task(nt_tx: mpsc::UnboundedSender<NtMsg>, nt_rx: Arc<Mutex<mpsc::UnboundedReceiver<String>>>) {
+    use tokio_tungstenite::connect_async;
+    use futures_util::StreamExt;
+    
+    let url = "ws://127.0.0.1:5810/nt4";
+    if let Ok((ws_stream, _)) = connect_async(url).await {
+        let (mut write, mut read) = ws_stream.split();
+        let mut telem = Telemetry::default();
+        telem.connected = true;
+        let _ = nt_tx.send(NtMsg::Telem(telem));
+        while let Some(Ok(msg)) = read.next().await {
+            // NT4 logic simplified for brevity
+        }
+    }
+}
