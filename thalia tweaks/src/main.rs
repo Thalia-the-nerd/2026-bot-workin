@@ -126,7 +126,14 @@ impl TweaksApp {
         ctx.set_pixels_per_point(1.5);
         
         let mut visuals = egui::Visuals::dark();
-        visuals.panel_fill = Color32::from_rgb(8, 8, 8);
+                visuals.panel_fill         = Color32::from_rgb(8, 8, 8);
+        visuals.window_fill        = Color32::from_rgb(12, 12, 12);
+        visuals.faint_bg_color     = Color32::from_rgb(14, 14, 14);
+        visuals.extreme_bg_color   = Color32::BLACK;
+        visuals.widgets.noninteractive.bg_fill = Color32::from_rgb(14, 14, 14);
+        visuals.widgets.noninteractive.fg_stroke = egui::Stroke::new(1.0, Color32::from_rgb(80, 80, 80));
+        visuals.selection.bg_fill  = Color32::WHITE;
+        visuals.selection.stroke   = egui::Stroke::new(1.0, Color32::BLACK);
         visuals.window_fill = Color32::from_rgb(12, 12, 12);
         ctx.set_visuals(visuals);
 
