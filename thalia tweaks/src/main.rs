@@ -174,3 +174,23 @@ impl TweaksApp {
         }
     }
 }
+
+impl TweaksApp {
+    fn apply_and_deploy(&mut self) {
+        rewrite_booleans("../deploy/tweaks.txt", &self.tweaks);
+        rewrite_doubles("../deploy/constants.txt", &self.speed_settings, &self.pid_settings);
+        self.log.push_str(">> Applied changes. Deploying...\n");
+        let log_arc = Arc::new(Mutex::new(String::new()));
+        let l2 = log_arc.clone();
+        std::thread::spawn(move || {
+            if let Ok(mut child) = Command::new("./gradlew").arg("deploy").stdout(Stdio::piped()).spawn() {
+                let reader = BufReader::new(child.stdout.take().unwrap());
+                for line in reader.lines() {
+                    if let Ok(l) = line {
+                        l2.lock().unwrap().push_str(&format!("{}\n", l));
+                    }
+                }
+            }
+        });
+    }
+}
