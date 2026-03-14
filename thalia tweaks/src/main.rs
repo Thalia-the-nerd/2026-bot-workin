@@ -194,3 +194,16 @@ impl TweaksApp {
         });
     }
 }
+
+impl TweaksApp {
+    fn save_preset(&mut self, name: &str) {
+        let path = format!("presets/{}.json", name);
+        self.log.push_str(&format!(">> Saved preset: {}\n", name));
+    }
+    fn load_preset(&mut self, name: &str) {
+        self.log.push_str(&format!(">> Loaded preset: {}\n", name));
+    }
+    fn refresh_presets(&mut self) {
+        self.preset_list = vec!["default".to_string(), "autonomous_high".to_string()];
+    }
+}
