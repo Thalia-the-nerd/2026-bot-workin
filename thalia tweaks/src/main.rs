@@ -59,3 +59,31 @@ fn group_prefix(id: &str) -> &str {
     let parts: Vec<&str> = id.split('_').collect();
     if parts.len() > 1 { parts[0] } else { id }
 }
+
+fn parse_booleans(path: &str) -> HashMap<String, bool> {
+    let mut map = HashMap::new();
+    if let Ok(content) = fs::read_to_string(path) {
+        for line in content.lines() {
+            let parts: Vec<&str> = line.split('=').collect();
+            if parts.len() == 2 {
+                map.insert(parts[0].to_string(), parts[1].trim() == "true");
+            }
+        }
+    }
+    map
+}
+
+fn parse_doubles(path: &str) -> HashMap<String, f64> {
+    let mut map = HashMap::new();
+    if let Ok(content) = fs::read_to_string(path) {
+        for line in content.lines() {
+            let parts: Vec<&str> = line.split('=').collect();
+            if parts.len() == 2 {
+                if let Ok(v) = parts[1].trim().parse::<f64>() {
+                    map.insert(parts[0].to_string(), v);
+                }
+            }
+        }
+    }
+    map
+}
