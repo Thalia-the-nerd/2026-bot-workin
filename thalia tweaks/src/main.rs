@@ -218,3 +218,11 @@ impl TweaksApp {
         ui.label(&self.log);
     }
 }
+
+impl TweaksApp {
+    fn draw_tweaks(&mut self, ui: &mut Ui) {
+        for t in &mut self.tweaks {
+            ui.checkbox(&mut t.state, &t.id);
+        }
+    }
+}
