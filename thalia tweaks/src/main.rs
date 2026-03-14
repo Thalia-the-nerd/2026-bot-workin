@@ -207,3 +207,14 @@ impl TweaksApp {
         self.preset_list = vec!["default".to_string(), "autonomous_high".to_string()];
     }
 }
+
+impl TweaksApp {
+    fn draw_dashboard(&mut self, ui: &mut Ui) {
+        let t = self.telemetry.lock().unwrap().clone();
+        ui.label(format!("Battery: {:.2}V", t.battery));
+        ui.label(format!("Turret RPM: {:.0}", t.turret_rpm));
+    }
+    fn draw_terminal(&mut self, ui: &mut Ui) {
+        ui.label(&self.log);
+    }
+}
