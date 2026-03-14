@@ -119,3 +119,41 @@ async fn spawn_nt_task(nt_tx: mpsc::UnboundedSender<NtMsg>, nt_rx: Arc<Mutex<mps
         }
     }
 }
+
+impl TweaksApp {
+    fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        let ctx = &cc.egui_ctx;
+        ctx.set_pixels_per_point(1.5);
+        
+        let mut visuals = egui::Visuals::dark();
+        visuals.panel_fill = Color32::from_rgb(8, 8, 8);
+        visuals.window_fill = Color32::from_rgb(12, 12, 12);
+        ctx.set_visuals(visuals);
+
+        let tweaks = default_tweaks();
+        let speed_settings = vec![];
+        let pid_settings = vec![];
+        let (nt_tx, _) = mpsc::unbounded_channel();
+        let nt_rx = Arc::new(Mutex::new(mpsc::unbounded_channel().1));
+        let telemetry = Arc::new(Mutex::new(Telemetry::default()));
+
+        Self {
+            tweaks,
+            speed_settings,
+            pid_settings,
+            tab: 0,
+            log: "Initialized.\n".to_string(),
+            auto_idx: 0,
+            selected_group: [None, None, None],
+            telemetry,
+            nt_tx,
+            nt_rx,
+            preset_name: String::new(),
+            preset_filter: String::new(),
+            save_dialog_open: false,
+            load_dialog_open: false,
+            preset_list: vec![],
+            selected_preset: None,
+        }
+    }
+}
