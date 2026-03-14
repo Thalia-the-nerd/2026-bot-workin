@@ -22,6 +22,9 @@ cargo build --release
 ```
 
 Or just run in development mode:
+## Future Roadmap [TODO]
+
+- [ ] **Localhost Web Panel**: Expose the Tweak Engine UI over `localhost` for LAN access. This will allow other computers on the same network to adjust parameters via a browser without needing the Rust binary installed.
 
 ```bash
 cargo run
