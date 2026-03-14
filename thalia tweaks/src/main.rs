@@ -226,3 +226,23 @@ impl TweaksApp {
         }
     }
 }
+
+impl eframe::App for TweaksApp {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        self.drain_nt();
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("PROJECT CERBERUS");
+            self.draw_tweaks(ui);
+            self.draw_dashboard(ui);
+        });
+    }
+}
+
+fn main() -> eframe::Result {
+    let native_options = eframe::NativeOptions::default();
+    eframe::run_native(
+        "Tweak Engine",
+        native_options,
+        Box::new(|cc| Ok(Box::new(TweaksApp::new(cc)))),
+    )
+}
