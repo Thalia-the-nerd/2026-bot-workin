@@ -10,7 +10,7 @@ pie title Language Distribution (by Line Count)
     "Java" : 4283
     "Rust" : 1724
     "Other" : 1145
-    "Markdown" : 1065
+    "Markdown" : 1063
     "Python" : 946
     "JSON" : 856
     "Gradle" : 198
@@ -28,7 +28,7 @@ pie title Language Distribution (by Line Count)
 | **Java** | `.java` | 42 | 4,283 |
 | **Rust** | `.rs` | 4 | 1,724 |
 | **Other** | `.bat, .gitignore, .html, .jar, .properties, .txt` | 12 | 1,145 |
-| **Markdown** | `.md` | 10 | 1,065 |
+| **Markdown** | `.md` | 10 | 1,063 |
 | **Python** | `.py` | 7 | 946 |
 | **JSON** | `.json` | 20 | 856 |
 | **Gradle** | `.gradle` | 2 | 198 |
@@ -42,4 +42,4 @@ pie title Language Distribution (by Line Count)
 > This breakdown is automatically generated. The heavy count of `.h` files is often due to external libraries included in the repository.
 
 ---
-*Last updated on 2026-03-14*
+*Last updated on 2026-03-16*
