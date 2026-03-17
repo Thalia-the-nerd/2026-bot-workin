@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests for TurretSubsystem angle conversion math.
  *
- * <p>Angles are: (rotations / gearRatio) * 360 for degrees, * 2π for radians.
- * TURRET_GEAR_RATIO = 10.0
+ * <p>Angles are: (rotations / gearRatio) * 360 for degrees, * 2π for radians. TURRET_GEAR_RATIO =
+ * 10.0
  */
 public class TurretAngleConversionTest {
 

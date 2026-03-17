@@ -60,15 +60,16 @@ public class FireControlSubsystemTest {
   public void testIsAtRPM_afterStop_reportsFalseForHighTarget() {
     m_fireControl.stop();
     // Simulated encoder starts at 0, so we won't be at 3000 RPM
-    assertFalse(m_fireControl.isAtRPM(3000.0, 50.0),
-        "After stop, should not be at 3000 RPM in sim");
+    assertFalse(
+        m_fireControl.isAtRPM(3000.0, 50.0), "After stop, should not be at 3000 RPM in sim");
   }
 
   @Test
   public void testIsAtRPM_zeroTarget_reportsTrueWhenStopped() {
     m_fireControl.stop();
     // Current RPM in sim is 0, target is 0, tolerance 50 → true
-    assertTrue(m_fireControl.isAtRPM(0.0, 50.0),
+    assertTrue(
+        m_fireControl.isAtRPM(0.0, 50.0),
         "After stop, sim encoder reading ~0, so isAtRPM(0, 50) is true");
   }
 
