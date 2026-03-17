@@ -60,14 +60,20 @@ public class FireCommandLogicTest {
     // applyDeadband(0.5, 0.1) rescales [0.1..1.0] → [0..1]
     // (0.5 - 0.1) / (1.0 - 0.1) = 0.4/0.9 ≈ 0.4444, so RPM ≈ 0.4444 * 5000 ≈ 2222
     double expected = (0.5 - 0.1) / (1.0 - 0.1) * MAX_RPM;
-    assertEquals(expected, computeTargetRPM(0.5), 1.0,
+    assertEquals(
+        expected,
+        computeTargetRPM(0.5),
+        1.0,
         "Half trigger RPM must account for deadband rescaling");
   }
 
   @Test
   public void testRPM_negativeTrigger_sameAsPositive() {
     // FireCommand uses Math.abs so negative trigger = same speed
-    assertEquals(computeTargetRPM(0.8), computeTargetRPM(-0.8), 1e-6,
+    assertEquals(
+        computeTargetRPM(0.8),
+        computeTargetRPM(-0.8),
+        1e-6,
         "Negative trigger (due to axis flip) gives same RPM as positive");
   }
 
@@ -91,7 +97,9 @@ public class FireCommandLogicTest {
 
   @Test
   public void testLoader_withinTolerance_shouldFeed() {
-    assertTrue(shouldFeed(3000.0, 3040.0), "Loader should feed when 40 RPM above target (within 50-RPM tolerance)");
+    assertTrue(
+        shouldFeed(3000.0, 3040.0),
+        "Loader should feed when 40 RPM above target (within 50-RPM tolerance)");
   }
 
   @Test
@@ -103,7 +111,8 @@ public class FireCommandLogicTest {
   public void testLoader_belowThresholdRPM_neverFeeds() {
     // Even if at exactly the same low RPM, the target must be >100 to feed
     assertFalse(shouldFeed(50.0, 50.0), "Loader must not feed when target RPM ≤ 100");
-    assertFalse(shouldFeed(100.0, 100.0), "Loader must not feed at exactly the threshold (> not >=)");
+    assertFalse(
+        shouldFeed(100.0, 100.0), "Loader must not feed at exactly the threshold (> not >=)");
   }
 
   @Test

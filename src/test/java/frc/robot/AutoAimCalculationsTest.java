@@ -27,8 +27,7 @@ public class AutoAimCalculationsTest {
   @Test
   public void testRPM_isNeverNegative() {
     AimResult result =
-        AutoAimCalculations.calculateLead(
-            new ChassisSpeeds(), ROBOT_ORIGIN, TARGET_AHEAD, 0.5);
+        AutoAimCalculations.calculateLead(new ChassisSpeeds(), ROBOT_ORIGIN, TARGET_AHEAD, 0.5);
     assertTrue(result.targetRPM >= 0, "targetRPM must never be negative");
   }
 
@@ -37,8 +36,7 @@ public class AutoAimCalculationsTest {
     // Extreme height target to push RPM high
     Pose3d veryHighTarget = new Pose3d(1.0, 0.0, 50.0, new Rotation3d());
     AimResult result =
-        AutoAimCalculations.calculateLead(
-            new ChassisSpeeds(), ROBOT_ORIGIN, veryHighTarget, 0.0);
+        AutoAimCalculations.calculateLead(new ChassisSpeeds(), ROBOT_ORIGIN, veryHighTarget, 0.0);
     assertTrue(result.targetRPM <= 5500, "targetRPM must be clamped to 5500");
   }
 
@@ -48,8 +46,7 @@ public class AutoAimCalculationsTest {
   public void testYaw_targetDirectlyAhead_isNearZero() {
     // Target is at (5, 0) – directly ahead, so yaw to aim should be ~0 radians
     AimResult result =
-        AutoAimCalculations.calculateLead(
-            new ChassisSpeeds(), ROBOT_ORIGIN, TARGET_AHEAD, 0.5);
+        AutoAimCalculations.calculateLead(new ChassisSpeeds(), ROBOT_ORIGIN, TARGET_AHEAD, 0.5);
     assertEquals(0.0, result.desiredYaw, 0.15, "Yaw for target directly ahead should be ~0 rad");
   }
 
@@ -58,8 +55,7 @@ public class AutoAimCalculationsTest {
     // Target at (0, 5) – directly to the left (positive Y), yaw should be positive (~PI/2)
     Pose3d leftTarget = new Pose3d(0.0, 5.0, 1.0, new Rotation3d());
     AimResult result =
-        AutoAimCalculations.calculateLead(
-            new ChassisSpeeds(), ROBOT_ORIGIN, leftTarget, 0.5);
+        AutoAimCalculations.calculateLead(new ChassisSpeeds(), ROBOT_ORIGIN, leftTarget, 0.5);
     assertTrue(result.desiredYaw > 0, "Target on the left should give positive yaw");
   }
 
@@ -68,8 +64,7 @@ public class AutoAimCalculationsTest {
     // Target at (0, -5) – to the right (negative Y)
     Pose3d rightTarget = new Pose3d(0.0, -5.0, 1.0, new Rotation3d());
     AimResult result =
-        AutoAimCalculations.calculateLead(
-            new ChassisSpeeds(), ROBOT_ORIGIN, rightTarget, 0.5);
+        AutoAimCalculations.calculateLead(new ChassisSpeeds(), ROBOT_ORIGIN, rightTarget, 0.5);
     assertTrue(result.desiredYaw < 0, "Target on the right should give negative yaw");
   }
 
@@ -82,8 +77,7 @@ public class AutoAimCalculationsTest {
     Pose3d sideTarget = new Pose3d(5.0, 5.0, 1.0, new Rotation3d());
 
     AimResult stationary =
-        AutoAimCalculations.calculateLead(
-            new ChassisSpeeds(), robotFacingRight, sideTarget, 0.5);
+        AutoAimCalculations.calculateLead(new ChassisSpeeds(), robotFacingRight, sideTarget, 0.5);
     AimResult moving =
         AutoAimCalculations.calculateLead(movingRight, robotFacingRight, sideTarget, 0.5);
 
@@ -126,11 +120,9 @@ public class AutoAimCalculationsTest {
   @Test
   public void testRPM_sameTargetDifferentTurretHeight_affectsRPM() {
     AimResult lowTurret =
-        AutoAimCalculations.calculateLead(
-            new ChassisSpeeds(), ROBOT_ORIGIN, TARGET_AHEAD, 0.0);
+        AutoAimCalculations.calculateLead(new ChassisSpeeds(), ROBOT_ORIGIN, TARGET_AHEAD, 0.0);
     AimResult highTurret =
-        AutoAimCalculations.calculateLead(
-            new ChassisSpeeds(), ROBOT_ORIGIN, TARGET_AHEAD, 2.0);
+        AutoAimCalculations.calculateLead(new ChassisSpeeds(), ROBOT_ORIGIN, TARGET_AHEAD, 2.0);
 
     assertNotEquals(
         lowTurret.targetRPM,
