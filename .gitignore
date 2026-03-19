@@ -190,3 +190,5 @@ compile_commands.json
 __pycache__/
 *.py[cod]
 *.class
+thalia-tweaks/target/
+utilities/pit-health-check-gui/target/

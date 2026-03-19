@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AimCommand;
-import frc.robot.commands.AutoAimCommand;
 import frc.robot.commands.DefaultDrive;
 import frc.robot.commands.FireCommand;
 import frc.robot.commands.IntakeSliderCommand;
@@ -42,10 +41,26 @@ public class RobotContainer {
   private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
   private final CameraSubsystem m_cameraSubsystem = new CameraSubsystem(m_driveSubsystem);
 
-  private final TurretSubsystem m_turretSubsystem = new TurretSubsystem();
-  private final FireControlSubsystem m_fireSubsystem = new FireControlSubsystem();
-  private final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
-  private final LoaderSubsystem m_loaderSubsystem = new LoaderSubsystem();
+  private final TurretSubsystem m_turretSubsystem =
+      new TurretSubsystem(
+          Constants.CURRENT_MODE == Constants.Mode.REAL
+              ? new frc.robot.subsystems.TurretIOSparkMax()
+              : new frc.robot.subsystems.TurretIO() {});
+  private final FireControlSubsystem m_fireSubsystem =
+      new FireControlSubsystem(
+          Constants.CURRENT_MODE == Constants.Mode.REAL
+              ? new frc.robot.subsystems.FireControlIOSparkMax()
+              : new frc.robot.subsystems.FireControlIO() {});
+  private final IntakeSubsystem m_intakeSubsystem =
+      new IntakeSubsystem(
+          Constants.CURRENT_MODE == Constants.Mode.REAL
+              ? new frc.robot.subsystems.IntakeIOSparkMax()
+              : new frc.robot.subsystems.IntakeIO() {});
+  private final LoaderSubsystem m_loaderSubsystem =
+      new LoaderSubsystem(
+          Constants.CURRENT_MODE == Constants.Mode.REAL
+              ? new frc.robot.subsystems.LoaderIOSparkMax()
+              : new frc.robot.subsystems.LoaderIO() {});
 
   // Initialize Commands
   private final DefaultDrive m_defaultDrive =
@@ -53,7 +68,7 @@ public class RobotContainer {
           m_driveSubsystem,
           this::getControllerLeftY,
           this::getControllerRightY,
-          () -> m_controller1.getHID().getLeftBumper());
+          () -> m_controller1.leftBumper().getAsBoolean());
   private final AimCommand m_aimCommand = new AimCommand(m_driveSubsystem, m_cameraSubsystem);
 
   // Init For Autonomous
@@ -94,10 +109,18 @@ public class RobotContainer {
     // Intake
     m_controller1
         .a()
+        .and(
+            () ->
+                !frc.robot.constants.TweakConstants.DISABLE_INTAKE_DURING_FIRE
+                    || !m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON).getAsBoolean())
         .toggleOnTrue(
             new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(1.0), m_intakeSubsystem));
     m_controller1
         .leftTrigger()
+        .and(
+            () ->
+                !frc.robot.constants.TweakConstants.DISABLE_INTAKE_DURING_FIRE
+                    || !m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON).getAsBoolean())
         .whileTrue(new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(-1.0), m_intakeSubsystem));
 
     // Fire Override
@@ -130,17 +153,16 @@ public class RobotContainer {
     m_flightstick
         .button(Constants.JOYSTICK_DEFAULT_BUTTON)
         .and(() -> !m_turretSubsystem.isUnwinding())
+        .and(
+            () ->
+                frc.robot.constants.TweakConstants.ALLOW_FIRE_WHILE_MOVING
+                    || Math.abs(m_driveSubsystem.getSpeeds().vxMetersPerSecond) < 0.1)
         .whileTrue(
             new FireCommand(
                 m_fireSubsystem,
                 m_loaderSubsystem,
                 () -> 1.0,
                 m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON)));
-
-    // Auto Aim Command (Bind to Button 2 of flight stick to toggle)
-    m_flightstick
-        .button(2)
-        .toggleOnTrue(new AutoAimCommand(m_turretSubsystem, m_cameraSubsystem, m_driveSubsystem));
 
     // Turret Preset Orientations (Buttons 6 - 11)
     // Values are placeholders for raw motor rotations until gear ratio is determined.
@@ -158,6 +180,15 @@ public class RobotContainer {
 
     // Emergency Unjam (Button 12)
     m_flightstick.button(12).onTrue(new UnjamIntakeCommand(m_intakeSubsystem));
+  }
+
+  public void disabledInit() {
+    m_turretSubsystem.setTargetAngle(0.0);
+  }
+
+  public edu.wpi.first.wpilibj2.command.Command getPitHealthCheckCommand() {
+    return new frc.robot.commands.PitHealthCheckCommand(
+        m_driveSubsystem, m_intakeSubsystem, m_fireSubsystem, m_loaderSubsystem, m_turretSubsystem);
   }
 
   private void initializeAutonomous() {
@@ -192,11 +223,13 @@ public class RobotContainer {
   }
 
   public double getControllerRightY() {
-    return -m_controller1.getRightY();
+    double y = -m_controller1.getRightY();
+    return frc.robot.constants.TweakConstants.INVERT_DRIVE_CONTROLS ? -y : y;
   }
 
   public double getControllerLeftY() {
-    return -m_controller1.getLeftY();
+    double y = -m_controller1.getLeftY();
+    return frc.robot.constants.TweakConstants.INVERT_DRIVE_CONTROLS ? -y : y;
   }
 
   public double GetFlightStickY() {

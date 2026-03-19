@@ -3,7 +3,6 @@ package frc.robot;
 import static org.junit.jupiter.api.Assertions.*;
 
 import edu.wpi.first.hal.HAL;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 import frc.robot.subsystems.LoaderSubsystem;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -16,8 +15,7 @@ public class LoaderSubsystemTest {
   @BeforeAll
   static void initAll() {
     assert HAL.initialize(500, 0);
-    SimHooks.pauseTiming();
-    m_loader = new LoaderSubsystem();
+    m_loader = new LoaderSubsystem(new frc.robot.subsystems.LoaderIO() {});
   }
 
   // ─── setLoaderSpeed ───────────────────────────────────────────────
@@ -29,20 +27,17 @@ public class LoaderSubsystemTest {
 
   @Test
   public void testSetLoaderSpeed_fullForward_doesNotThrow() {
-    assertDoesNotThrow(
-        () -> m_loader.setLoaderSpeed(1.0), "setLoaderSpeed(1.0) must not throw");
+    assertDoesNotThrow(() -> m_loader.setLoaderSpeed(1.0), "setLoaderSpeed(1.0) must not throw");
   }
 
   @Test
   public void testSetLoaderSpeed_fullReverse_doesNotThrow() {
-    assertDoesNotThrow(
-        () -> m_loader.setLoaderSpeed(-1.0), "setLoaderSpeed(-1.0) must not throw");
+    assertDoesNotThrow(() -> m_loader.setLoaderSpeed(-1.0), "setLoaderSpeed(-1.0) must not throw");
   }
 
   @Test
   public void testSetLoaderSpeed_halfSpeed_doesNotThrow() {
-    assertDoesNotThrow(
-        () -> m_loader.setLoaderSpeed(0.5), "setLoaderSpeed(0.5) must not throw");
+    assertDoesNotThrow(() -> m_loader.setLoaderSpeed(0.5), "setLoaderSpeed(0.5) must not throw");
   }
 
   // SlewRateLimiter: speed ramps up, so first call won't be at full speed immediately.
@@ -52,7 +47,8 @@ public class LoaderSubsystemTest {
   public void testSetLoaderSpeed_repeatedCalls_doesNotThrow() {
     for (double speed = -1.0; speed <= 1.0; speed += 0.25) {
       final double s = speed;
-      assertDoesNotThrow(() -> m_loader.setLoaderSpeed(s), "setLoaderSpeed(" + s + ") must not throw");
+      assertDoesNotThrow(
+          () -> m_loader.setLoaderSpeed(s), "setLoaderSpeed(" + s + ") must not throw");
     }
   }
 
@@ -76,8 +72,8 @@ public class LoaderSubsystemTest {
     m_loader.setLoaderSpeed(1.0);
     m_loader.stop();
     // Now call forward again – shouldn't throw even without time advancing
-    assertDoesNotThrow(() -> m_loader.setLoaderSpeed(1.0),
-        "setLoaderSpeed after stop should not throw");
+    assertDoesNotThrow(
+        () -> m_loader.setLoaderSpeed(1.0), "setLoaderSpeed after stop should not throw");
   }
 
   // ─── periodic ────────────────────────────────────────────────────

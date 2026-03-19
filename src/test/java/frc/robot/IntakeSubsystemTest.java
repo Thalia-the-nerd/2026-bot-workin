@@ -3,7 +3,6 @@ package frc.robot;
 import static org.junit.jupiter.api.Assertions.*;
 
 import edu.wpi.first.hal.HAL;
-import edu.wpi.first.wpilibj.simulation.SimHooks;
 import frc.robot.subsystems.IntakeSubsystem;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -21,8 +20,27 @@ public class IntakeSubsystemTest {
   @BeforeAll
   static void initAll() {
     assert HAL.initialize(500, 0);
-    SimHooks.pauseTiming();
-    m_intake = new IntakeSubsystem();
+    m_intake =
+        new IntakeSubsystem(
+            new frc.robot.subsystems.IntakeIO() {
+              private double volts = 0.0;
+
+              @Override
+              public void updateInputs(IntakeIOInputs inputs) {
+                inputs.mainMotorAppliedVolts = volts;
+                inputs.mainMotorCurrentAmps = 0.0; // Simulated
+              }
+
+              @Override
+              public void setVoltage(double v) {
+                volts = v;
+              }
+
+              @Override
+              public void stop() {
+                volts = 0.0;
+              }
+            });
   }
 
   // ─── setIntakeSpeed ───────────────────────────────────────────────
@@ -34,20 +52,17 @@ public class IntakeSubsystemTest {
 
   @Test
   public void testSetIntakeSpeed_fullForward_doesNotThrow() {
-    assertDoesNotThrow(
-        () -> m_intake.setIntakeSpeed(1.0), "setIntakeSpeed(1.0) must not throw");
+    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(1.0), "setIntakeSpeed(1.0) must not throw");
   }
 
   @Test
   public void testSetIntakeSpeed_fullReverse_doesNotThrow() {
-    assertDoesNotThrow(
-        () -> m_intake.setIntakeSpeed(-1.0), "setIntakeSpeed(-1.0) must not throw");
+    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(-1.0), "setIntakeSpeed(-1.0) must not throw");
   }
 
   @Test
   public void testSetIntakeSpeed_halfSpeed_doesNotThrow() {
-    assertDoesNotThrow(
-        () -> m_intake.setIntakeSpeed(0.5), "setIntakeSpeed(0.5) must not throw");
+    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(0.5), "setIntakeSpeed(0.5) must not throw");
   }
 
   // ─── stop ────────────────────────────────────────────────────────
@@ -74,8 +89,7 @@ public class IntakeSubsystemTest {
   public void testPeriodic_runMultipleTimes_doesNotThrow() {
     for (int i = 0; i < 10; i++) {
       final int tick = i;
-      assertDoesNotThrow(
-          () -> m_intake.periodic(), "periodic() tick " + tick + " must not throw");
+      assertDoesNotThrow(() -> m_intake.periodic(), "periodic() tick " + tick + " must not throw");
     }
   }
 
@@ -91,7 +105,8 @@ public class IntakeSubsystemTest {
     }
     // If the intake had jammed, setIntakeSpeed would be silently blocked.
     // We can verify the system is still responsive by calling stop without exception.
-    assertDoesNotThrow(() -> m_intake.stop(),
+    assertDoesNotThrow(
+        () -> m_intake.stop(),
         "After many ticks with 0A sim current, intake should still be stoppable");
   }
 

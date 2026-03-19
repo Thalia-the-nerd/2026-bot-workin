@@ -49,9 +49,9 @@ public class HelperFunctionsTest {
   @Test
   public void testInDeadzone_zeroDeadzone_noValueIsInside() {
     // inDeadzone uses strict < so Math.abs(0.0) < 0.0 is false – even 0.0 is outside
-    assertFalse(HelperFunctions.inDeadzone(0.0, 0.0), "0.0 is NOT inside a zero deadzone (strict <)");
     assertFalse(
-        HelperFunctions.inDeadzone(0.001, 0.0), "Any non-zero is outside a zero deadzone");
+        HelperFunctions.inDeadzone(0.0, 0.0), "0.0 is NOT inside a zero deadzone (strict <)");
+    assertFalse(HelperFunctions.inDeadzone(0.001, 0.0), "Any non-zero is outside a zero deadzone");
   }
 
   // ─── inRange ─────────────────────────────────────────────────────
@@ -85,7 +85,6 @@ public class HelperFunctionsTest {
   @Test
   public void testInRange_largeValues() {
     assertTrue(HelperFunctions.inRange(5000.0, 4990.0, 25.0), "4990 is within 25 of 5000");
-    assertFalse(
-        HelperFunctions.inRange(5000.0, 4970.0, 25.0), "4970 is NOT within 25 of 5000");
+    assertFalse(HelperFunctions.inRange(5000.0, 4970.0, 25.0), "4970 is NOT within 25 of 5000");
   }
 }
