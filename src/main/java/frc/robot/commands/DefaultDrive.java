@@ -2,6 +2,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.DriveSubsystem;
@@ -14,6 +15,9 @@ public class DefaultDrive extends Command {
   private final DoubleSupplier m_left_y; // this gives us the left y axis for current controller
   private final DoubleSupplier m_right_y; // this gives us the right y axis for current controller
   private final java.util.function.BooleanSupplier m_precision_mode; // Precision Mode Toggle
+
+  private final SlewRateLimiter m_leftLimiter = new SlewRateLimiter(4.0);
+  private final SlewRateLimiter m_rightLimiter = new SlewRateLimiter(4.0);
 
   /**
    * Creates a new DefaultDrive command.
@@ -49,13 +53,33 @@ public class DefaultDrive extends Command {
     if (!HelperFunctions.inDeadzone(m_left_y.getAsDouble(), Constants.CONTROLLER_DEAD_ZONE)
         || !HelperFunctions.inDeadzone(m_right_y.getAsDouble(), Constants.CONTROLLER_DEAD_ZONE)) {
 
-      double speedMultiplier = m_precision_mode.getAsBoolean() ? 0.3 : 1.0;
+      double speedMultiplier = 1.0;
+      if (frc.robot.constants.TweakConstants.LIMIT_DRIVE_SPEED_TO_75
+          && !frc.robot.constants.TweakConstants.BOOST_MODE_OVERRIDE) {
+        speedMultiplier = 0.75;
+      }
+      if (frc.robot.constants.TweakConstants.SLOW_MODE_MODIFIER_ACTIVE
+          && m_precision_mode.getAsBoolean()) {
+        speedMultiplier = 0.3;
+      }
+
+      double leftInput = m_left_y.getAsDouble() * speedMultiplier;
+      double rightInput = m_right_y.getAsDouble() * speedMultiplier;
+
+      if (frc.robot.constants.TweakConstants.KINEMATIC_DRIVE_SMOOTHING) {
+        leftInput = m_leftLimiter.calculate(leftInput);
+        rightInput = m_rightLimiter.calculate(rightInput);
+      } else {
+        m_leftLimiter.reset(leftInput);
+        m_rightLimiter.reset(rightInput);
+      }
 
       this.m_driveSubsystem.tankDrive(
-          Constants.MAX_SPEED * m_left_y.getAsDouble() * speedMultiplier,
-          Constants.MAX_SPEED * m_right_y.getAsDouble() * speedMultiplier);
+          Constants.MAX_SPEED * leftInput, Constants.MAX_SPEED * rightInput);
     } else {
       // Must explicitly stop if within deadzone or else motors will coast at last value
+      m_leftLimiter.reset(0.0);
+      m_rightLimiter.reset(0.0);
       this.m_driveSubsystem.tankDrive(0, 0);
     }
   }

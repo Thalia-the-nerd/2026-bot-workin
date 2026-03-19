@@ -6,17 +6,18 @@ A comprehensive analysis of the languages that power this codebase.
 
 ```mermaid
 pie title Language Distribution (by Line Count)
-    "Rust Lockfile" : 9825
-    "Java" : 4283
-    "Rust" : 1724
-    "Other" : 1145
-    "Markdown" : 1063
-    "Python" : 946
+    "C++ Headers" : 167034
+    "Rust Lockfile" : 9562
+    "Java" : 4522
+    "Other" : 4195
+    "Markdown" : 1145
+    "Python" : 1133
+    "Rust" : 1059
+    "C++ Source" : 875
     "JSON" : 856
-    "Gradle" : 198
-    "C++ Source" : 67
-    "TOML" : 50
-    "C++ Headers" : 42
+    "Gradle" : 204
+    "Shell" : 47
+    "TOML" : 35
     "YAML" : 5
 ```
 
@@ -24,17 +25,18 @@ pie title Language Distribution (by Line Count)
 
 | Language | Extensions | File Count | Line Count |
 | :--- | :--- | :--- | :--- |
-| **Rust Lockfile** | `.lock` | 3 | 9,825 |
-| **Java** | `.java` | 42 | 4,283 |
-| **Rust** | `.rs` | 4 | 1,724 |
-| **Other** | `.bat, .gitignore, .html, .jar, .properties, .txt` | 12 | 1,145 |
-| **Markdown** | `.md` | 10 | 1,063 |
-| **Python** | `.py` | 7 | 946 |
+| **C++ Headers** | `.h, .hpp, .inc` | 323 | 167,034 |
+| **Rust Lockfile** | `.lock` | 2 | 9,562 |
+| **Java** | `.java` | 50 | 4,522 |
+| **Other** | `.bat, .csv, .gitignore, .html, .jar, .properties, .txt` | 15 | 4,195 |
+| **Markdown** | `.md` | 13 | 1,145 |
+| **Python** | `.py` | 9 | 1,133 |
+| **Rust** | `.rs` | 2 | 1,059 |
+| **C++ Source** | `.cpp` | 1 | 875 |
 | **JSON** | `.json` | 20 | 856 |
-| **Gradle** | `.gradle` | 2 | 198 |
-| **C++ Source** | `.cpp` | 1 | 67 |
-| **TOML** | `.toml` | 3 | 50 |
-| **C++ Headers** | `.h` | 1 | 42 |
+| **Gradle** | `.gradle` | 2 | 204 |
+| **Shell** | `.sh` | 2 | 47 |
+| **TOML** | `.toml` | 2 | 35 |
 | **YAML** | `.yml` | 1 | 5 |
 
 
@@ -42,4 +44,4 @@ pie title Language Distribution (by Line Count)
 > This breakdown is automatically generated. The heavy count of `.h` files is often due to external libraries included in the repository.
 
 ---
-*Last updated on 2026-03-16*
+*Last updated on 2026-03-19*

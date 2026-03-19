@@ -63,4 +63,9 @@ public final class TweakConstants {
   public static boolean DISPLAY_BIRDSEYE_MAP_DASHBOARD = true;
   // 59. FAST_BOOT_RIO_MODE
   public static boolean FAST_BOOT_RIO_MODE = false;
+  // --- Future Prediction Options ---
+  // ENABLE_AI_TARGET_PREDICTION
+  public static boolean ENABLE_AI_TARGET_PREDICTION = false;
+  // KINEMATIC_DRIVE_SMOOTHING
+  public static boolean KINEMATIC_DRIVE_SMOOTHING = false;
 }

@@ -41,7 +41,7 @@ impl PitHealthApp {
             let url = Url::parse("ws://127.0.0.1:8765").unwrap();
             
             loop {
-                if let Ok((ws_stream, _)) = connect_async(&url).await {
+                if let Ok((ws_stream, _)) = connect_async(url.as_str()).await {
                     let (_, mut read) = ws_stream.split();
                     
                     while let Some(msg) = read.next().await {

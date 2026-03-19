@@ -87,6 +87,22 @@ public class AimCommand extends SequentialCommandGroup {
               RobotTelemetry.recordOutput("AimCamToTargetTransform", cameraToTarget);
 
               Transform3d targetOffset = cameraToTarget.plus(targetingOffset);
+
+              if (frc.robot.constants.TweakConstants.ENABLE_AI_TARGET_PREDICTION) {
+                edu.wpi.first.math.kinematics.ChassisSpeeds speeds = d_subsystem.getSpeeds();
+                double timeOfFlight = distance / 15.0; // Approx 15 m/s ball velocity
+                double robotMovementX = speeds.vxMetersPerSecond * timeOfFlight;
+                double robotMovementY = speeds.vyMetersPerSecond * timeOfFlight;
+
+                // Because the projectile inherits the robot's momentum, we must aim in the
+                // inverse direction of travel to correctly lead the target.
+                targetOffset =
+                    targetOffset.plus(
+                        new Transform3d(
+                            new Translation3d(-robotMovementX, -robotMovementY, 0),
+                            new Rotation3d()));
+              }
+
               RobotTelemetry.recordOutput("AimTargetRelRobotPose", targetOffset);
 
               Pose3d robotPose = new Pose3d(d_subsystem.getPose());

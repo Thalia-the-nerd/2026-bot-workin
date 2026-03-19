@@ -56,6 +56,7 @@ def includeDesktopSupport = false
 // Also defines JUnit 5.
 dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
+    annotationProcessor 'org.littletonrobotics.akit:akit-autolog:26.0.0'
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
@@ -80,6 +81,11 @@ dependencies {
 test {
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
 }
 
 // Simulation configuration (e.g. environment variables).

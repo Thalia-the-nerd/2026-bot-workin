@@ -54,7 +54,22 @@ public class Robot extends LoggedRobot {
     switch (Constants.CURRENT_MODE) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        Logger.addDataReceiver(new WPILOGWriter());
+        if (frc.robot.constants.TweakConstants.RECORD_TELEMETRY_TO_USB) {
+          java.io.File usb1 = new java.io.File("/media/sda1");
+          java.io.File usb2 = new java.io.File("/media/sda2");
+          if (usb1.exists() && usb1.isDirectory()) {
+            Logger.addDataReceiver(new WPILOGWriter("/media/sda1/logs"));
+            System.out.println("USB Logging initialized on /media/sda1");
+          } else if (usb2.exists() && usb2.isDirectory()) {
+            Logger.addDataReceiver(new WPILOGWriter("/media/sda2/logs"));
+            System.out.println("USB Logging initialized on /media/sda2");
+          } else {
+            System.out.println("WARNING: NO USB STICK FOUND. FALLING BACK TO ROBORIO FLASH!");
+            frc.robot.RobotTelemetry.putString(
+                "Alerts/USB Logging", "No USB Drive Found! Logging to RIO Flash.");
+            Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+          }
+        }
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
@@ -77,6 +92,19 @@ public class Robot extends LoggedRobot {
 
     // Start logging! No more data receivers, replay sources, or metadata values may be added.
     Logger.start();
+
+    if (frc.robot.constants.TweakConstants.DISABLE_BROWNOUT_PROTECTION) {
+      edu.wpi.first.wpilibj.RobotController.setBrownoutVoltage(0.0);
+    }
+
+    if (frc.robot.constants.TweakConstants.FAST_BOOT_RIO_MODE) {
+      System.out.println("FAST BOOT RIO MODE ENABLED! Skipping deep init checks.");
+    }
+
+    if (frc.robot.constants.TweakConstants.ENABLE_PIT_HEALTH_CHECK_ON_START) {
+      // Pit health check requested
+      System.out.println("Pit Health Check routine requested on startup.");
+    }
 
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
@@ -110,12 +138,26 @@ public class Robot extends LoggedRobot {
     if (m_robotContainer.enableAutoProfiling) {
       System.out.println("WARNING, AUTO PROFILE IS ENABLED!");
     }
+
+    // Check for Battery Sagging
+    if (frc.robot.constants.TweakConstants.BATTERY_SAGGING_ALERT
+        && !frc.robot.constants.TweakConstants.OVERRIDE_BATTERY_SENSE) {
+      if (edu.wpi.first.wpilibj.RobotController.getBatteryVoltage() < 11.0) {
+        System.out.println("WARNING: BATTERY VOLTAGE SAG DETECTED (< 11.0V)!");
+      }
+    }
+
     frc.robot.constants.SpeedConstants.syncNetworkTables();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    if (frc.robot.constants.TweakConstants.AUTO_HOME_TURRET_ON_DISABLE
+        && m_robotContainer != null) {
+      m_robotContainer.disabledInit();
+    }
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -143,6 +185,12 @@ public class Robot extends LoggedRobot {
     // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
+    }
+
+    if (frc.robot.constants.TweakConstants.ENABLE_PIT_HEALTH_CHECK_ON_START
+        && m_robotContainer != null) {
+      edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance()
+          .schedule(m_robotContainer.getPitHealthCheckCommand());
     }
   }
 

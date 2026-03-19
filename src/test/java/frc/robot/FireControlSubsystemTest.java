@@ -21,7 +21,26 @@ public class FireControlSubsystemTest {
   static void initAll() {
     assert HAL.initialize(500, 0);
     SimHooks.pauseTiming();
-    m_fireControl = new FireControlSubsystem();
+    m_fireControl =
+        new FireControlSubsystem(
+            new frc.robot.subsystems.FireControlIO() {
+              private double rpm = 0.0;
+
+              @Override
+              public void updateInputs(FireControlIOInputs inputs) {
+                inputs.velocityRPM = rpm;
+              }
+
+              @Override
+              public void setVelocity(double v, double ff) {
+                rpm = v;
+              }
+
+              @Override
+              public void stop() {
+                rpm = 0.0;
+              }
+            });
   }
 
   // ─── stop() ──────────────────────────────────────────────────────
@@ -54,21 +73,35 @@ public class FireControlSubsystemTest {
         () -> m_fireControl.setShooterRPM(5000.0), "setShooterRPM(5000) must not throw");
   }
 
+  @Test
+  public void testSetShooterRPM_exceedingMaxRPM_doesNotBreak() {
+    assertDoesNotThrow(
+        () -> m_fireControl.setShooterRPM(10000.0),
+        "setShooterRPM(10000) must safely process limits");
+  }
+
+  @Test
+  public void testSetShooterRPM_NaNInput_doesNotThrow() {
+    assertDoesNotThrow(
+        () -> m_fireControl.setShooterRPM(Double.NaN), "setShooterRPM(NaN) must not crash");
+  }
+
   // ─── isAtRPM() ───────────────────────────────────────────────────
 
   @Test
   public void testIsAtRPM_afterStop_reportsFalseForHighTarget() {
     m_fireControl.stop();
-    // Simulated encoder starts at 0, so we won't be at 3000 RPM
-    assertFalse(m_fireControl.isAtRPM(3000.0, 50.0),
-        "After stop, should not be at 3000 RPM in sim");
+    m_fireControl.periodic(); // Synchronize inputs
+    assertFalse(
+        m_fireControl.isAtRPM(3000.0, 50.0), "After stop, should not be at 3000 RPM in sim");
   }
 
   @Test
   public void testIsAtRPM_zeroTarget_reportsTrueWhenStopped() {
     m_fireControl.stop();
-    // Current RPM in sim is 0, target is 0, tolerance 50 → true
-    assertTrue(m_fireControl.isAtRPM(0.0, 50.0),
+    m_fireControl.periodic(); // Synchronize inputs
+    assertTrue(
+        m_fireControl.isAtRPM(0.0, 50.0),
         "After stop, sim encoder reading ~0, so isAtRPM(0, 50) is true");
   }
 

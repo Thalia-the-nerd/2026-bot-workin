@@ -290,3 +290,5 @@ We are extremely grateful for the generous support of our sponsors. Their contri
   <br>
   <i>Built by Miami Beach Bots</i>
 </div>
+## Installation Instructions
+For complete cross-platform developer provisioning and compilation steps, please view the fully detailed [`deploy-guide.md`](deploy-guide.md).

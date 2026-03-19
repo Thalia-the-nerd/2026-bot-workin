@@ -1,39 +1,24 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotTelemetry;
-import frc.robot.constants.Constants.CANConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class FireControlSubsystem extends SubsystemBase {
-  private final SparkMax m_fireMotor;
-  private final SparkMaxConfig m_config;
-  private final SparkClosedLoopController m_pidController;
-  private final RelativeEncoder m_encoder;
+  private final FireControlIO m_io;
+  private final FireControlIOInputsAutoLogged m_inputs = new FireControlIOInputsAutoLogged();
+  private final SimpleMotorFeedforward m_feedforward;
+  private final edu.wpi.first.math.filter.SlewRateLimiter m_spinDownLimiter;
 
-  @SuppressWarnings("removal")
-  public FireControlSubsystem() {
-    m_fireMotor = new SparkMax(CANConstants.MOTOR_FIRE_ID, MotorType.kBrushless);
-    m_config = new SparkMaxConfig();
+  public FireControlSubsystem(FireControlIO io) {
+    m_io = io;
 
-    // Safety Limits
-    m_config.smartCurrentLimit(40);
+    // Approximate feedforward constants for a NEO flywheel (Volts, V*s/rad, V*s^2/rad)
+    m_feedforward = new SimpleMotorFeedforward(0.1, 0.12, 0.01);
 
-    // Initial PID configs (to be tuned later)
-    m_config.closedLoop.pid(0.0001, 0, 0);
-    m_config.closedLoop.outputRange(0, 1.0); // positive RPM only
-
-    m_fireMotor.configure(m_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    m_pidController = m_fireMotor.getClosedLoopController();
-    m_encoder = m_fireMotor.getEncoder();
+    // Limits deceleration to 5000 RPM per second
+    m_spinDownLimiter = new edu.wpi.first.math.filter.SlewRateLimiter(5000.0);
   }
 
   /**
@@ -43,11 +28,18 @@ public class FireControlSubsystem extends SubsystemBase {
    */
   public void setShooterRPM(double targetRPM) {
     if (targetRPM <= 0) {
-      stop();
-      return;
+      targetRPM = m_spinDownLimiter.calculate(0);
+      if (targetRPM < 50) {
+        stop();
+        return;
+      }
+    } else {
+      m_spinDownLimiter.reset(targetRPM);
     }
-    m_pidController.setReference(
-        targetRPM, ControlType.kVelocity, com.revrobotics.spark.ClosedLoopSlot.kSlot0);
+    // Convert target RPM to target revs/second for Feedforward
+    double feedforwardVoltage = m_feedforward.calculate(targetRPM / 60.0);
+
+    m_io.setVelocity(targetRPM, feedforwardVoltage);
   }
 
   /**
@@ -58,25 +50,29 @@ public class FireControlSubsystem extends SubsystemBase {
    * @return True if the RPM is within the tolerance.
    */
   public boolean isAtRPM(double targetRPM, double tolerance) {
-    double currentRPM = m_encoder.getVelocity();
+    double currentRPM = m_inputs.velocityRPM;
     return Math.abs(currentRPM - targetRPM) <= tolerance;
   }
 
   /** Stops the fire motor. */
   public void stop() {
-    m_fireMotor.set(0);
+    m_spinDownLimiter.reset(0);
+    m_io.stop();
   }
 
   @Override
   public void periodic() {
+    m_io.updateInputs(m_inputs);
+    Logger.processInputs("FireControl", m_inputs);
+
     // Debugging current fire motor speed and RPM
-    RobotTelemetry.putNumber("Fire Motor Speed Output", m_fireMotor.get());
-    RobotTelemetry.putNumber("Fire Motor RPM", m_encoder.getVelocity());
+    RobotTelemetry.putNumber("Fire Motor Speed Output", m_inputs.appliedVolts / 12.0);
+    RobotTelemetry.putNumber("Fire Motor RPM", m_inputs.velocityRPM);
   }
 
   @Override
   public void simulationPeriodic() {
     // Broadcast for Python App
-    RobotTelemetry.putBoolean("Sim_IsFiring", Math.abs(m_fireMotor.get()) > 0.1);
+    RobotTelemetry.putBoolean("Sim_IsFiring", Math.abs(m_inputs.appliedVolts) > 1.2);
   }
 }
