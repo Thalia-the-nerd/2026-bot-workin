@@ -42,7 +42,7 @@ okay, when you physically attach the loader and intake NEOs, you need to verify 
 
 i threw away the terrible polynomial math we were using for the turret auto-aim. we're using WPILib's `InterpolatingDoubleTreeMap` now. but you need to manually calibrate the physical firing angles.
 
-1.  put the robot exactly 5 feet away from the subwoofer.
+1.  put the robot exactly 5 feet away from the hub.
 2.  cicle through the angles from 125, 100, 75, 50, 25, 0, -25, -50, -75, -100, -125 recording the speed needed to hit the target. right speed can be changed in the tuning app. if im feeling good i will add a thing on controller for this.
 3.  do the exact same thing for 10 feet, 15 feet, 20 feet, and 25 feet.
 4.  put those 5 pairs of numbers into my python script:
