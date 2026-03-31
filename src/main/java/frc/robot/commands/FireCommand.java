@@ -58,7 +58,7 @@ public class FireCommand extends Command {
     if (targetRPM > 100
         && (frc.robot.constants.TweakConstants.IGNORE_SPINUP_TIME
             || m_fireSubsystem.isAtRPM(targetRPM, 50.0))) {
-      m_loaderSubsystem.setLoaderSpeed(1.0); // Full speed feed
+      m_loaderSubsystem.setLoaderSpeed(edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.getNumber("Regression Test Loader Speed", 1.0)); // Configurable speed feed
     } else {
       m_loaderSubsystem.stop();
     }

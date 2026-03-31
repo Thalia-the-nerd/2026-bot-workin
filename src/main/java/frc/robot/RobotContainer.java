@@ -143,14 +143,9 @@ public class RobotContainer {
         new RunCommand(
             () -> m_turretSubsystem.setTurretSpeed(m_flightstick.getX() * 0.8), m_turretSubsystem));
 
-    // Loader Default Command (Bind to Y-axis of flight stick)
-    m_loaderSubsystem.setDefaultCommand(
-        new RunCommand(
-            () -> m_loaderSubsystem.setLoaderSpeed(m_flightstick.getY()), m_loaderSubsystem));
-
     // Fire Control Command (Bind to Trigger / Button 1 of flight stick)
-    // Run at full speed (1.0) or regression test speed while trigger is held.
-    SmartDashboard.putNumber("Regression Test Firing Speed", 1.0);
+    // Run at Y-axis speed while trigger is held. Loader feeds at SmartDashboard speed.
+    SmartDashboard.putNumber("Regression Test Loader Speed", 1.0);
     m_flightstick
         .button(Constants.JOYSTICK_DEFAULT_BUTTON)
         .and(() -> !m_turretSubsystem.isUnwinding())
@@ -162,15 +157,15 @@ public class RobotContainer {
             new FireCommand(
                 m_fireSubsystem,
                 m_loaderSubsystem,
-                () -> SmartDashboard.getNumber("Regression Test Firing Speed", 1.0),
+                () -> m_flightstick.getY(),
                 m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON)));
 
-    // Intake on Flight Stick (Button 6)
-    m_flightstick.button(6).whileTrue(
+    // Intake on Flight Stick (Button 6) - Toggle
+    m_flightstick.button(6).toggleOnTrue(
             new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(1.0), m_intakeSubsystem));
 
-    // Loader 1 & 2 on Flight Stick (Button 7)
-    m_flightstick.button(7).whileTrue(
+    // Loader 1 & 2 on Flight Stick (Button 7) - Toggle
+    m_flightstick.button(7).toggleOnTrue(
             new RunCommand(() -> m_loaderSubsystem.setLoaderSpeed(1.0), m_loaderSubsystem));
 
     // Turret Preset Orientations (Buttons 8 - 11)
