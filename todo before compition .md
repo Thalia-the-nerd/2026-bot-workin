@@ -7,8 +7,7 @@
 - [ ]
 
 ## Fixing Bugs
-- [ ]
-
+- [x] Fix AdvantageKit IO update order and tank drive deadband bugs
 ## Doing the Regression Model
 - [ ]
 
