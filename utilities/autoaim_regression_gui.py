@@ -133,22 +133,24 @@ class FieldMap(tk.Canvas):
         self.create_line(self.target_x, self.target_y, self.target_x, 400, fill="#333", dash=(2,2))
         
         # Draw Target
-        self.create_oval(self.target_x-12, self.target_y-12, self.target_x+12, self.target_y+12, fill="#007acc", outline="#00ffff", width=2)
-        self.create_text(self.target_x, self.target_y-25, text="TARGET", fill="#00ffff", font=("Arial", 10, "bold"))
+        self.create_oval(self.target_x-16, self.target_y-16, self.target_x+16, self.target_y+16, fill="#007acc", outline="#00ffff", width=2)
+        self.create_text(self.target_x, self.target_y-28, text="TARGET", fill="#00ffff", font=("Arial", 11, "bold"))
 
         # Draw Points
         for p in self.app.points:
             px, py = self.polar_to_px(p['distance'], p['angle'])
             is_selected = (p['id'] == self.app.selected_id)
             color = "#00ff00" if is_selected else "#ff3333"
-            size = 8 if is_selected else 6
-            self.create_oval(px-size, py-size, px+size, py+size, fill=color, outline="white", width=1 if not is_selected else 2)
-            self.create_text(px, py+14, text=f"ID: {p['id']}", fill="white", font=("Arial", 8, "bold" if is_selected else "normal"))
+            size = 9 if is_selected else 7
+            self.create_oval(px-size, py-size, px+size, py+size, fill=color, outline="white", width=2 if is_selected else 1)
+            self.create_text(px, py+16, text=f"ID: {p['id']}", fill="white", font=("Arial", 9, "bold" if is_selected else "normal"))
 
         # Draw Preview Point
         if self.app.preview_point:
             px, py = self.polar_to_px(self.app.preview_point['distance'], self.app.preview_point['angle'])
-            self.create_oval(px-6, py-6, px+6, py+6, fill="#ffff00", outline="#ffffff", width=2)
+            self.create_oval(px-8, py-8, px+8, py+8, fill="#ffff00", outline="#ffffff", width=2)
+            label_text = f"Dist: {self.app.preview_point['distance']:.1f} in\nAngle: {self.app.preview_point['angle']:.1f}°"
+            self.create_text(px + 14, py, text=label_text, fill="#ffff00", font=("Arial", 10, "bold"), anchor=tk.W)
 
     def polar_to_px(self, distance, angle):
         rad = math.radians(angle)
