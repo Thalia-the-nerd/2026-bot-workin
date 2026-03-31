@@ -50,9 +50,15 @@ public class DefaultDrive extends Command {
   public void execute() {
     // we include a limit on the drivers speed for safety.
     m_driveSubsystem.setReducedSpeed(false);
-    if (!HelperFunctions.inDeadzone(m_left_y.getAsDouble(), Constants.CONTROLLER_DEAD_ZONE)
-        || !HelperFunctions.inDeadzone(m_right_y.getAsDouble(), Constants.CONTROLLER_DEAD_ZONE)) {
+    
+    double leftRaw = m_left_y.getAsDouble();
+    double rightRaw = m_right_y.getAsDouble();
+    
+    // Apply deadband individually to each axis
+    double leftDeadbanded = edu.wpi.first.math.MathUtil.applyDeadband(leftRaw, Constants.CONTROLLER_DEAD_ZONE);
+    double rightDeadbanded = edu.wpi.first.math.MathUtil.applyDeadband(rightRaw, Constants.CONTROLLER_DEAD_ZONE);
 
+    if (leftDeadbanded != 0.0 || rightDeadbanded != 0.0) {
       double speedMultiplier = 1.0;
       if (frc.robot.constants.TweakConstants.LIMIT_DRIVE_SPEED_TO_75
           && !frc.robot.constants.TweakConstants.BOOST_MODE_OVERRIDE) {
@@ -63,8 +69,8 @@ public class DefaultDrive extends Command {
         speedMultiplier = 0.3;
       }
 
-      double leftInput = m_left_y.getAsDouble() * speedMultiplier;
-      double rightInput = m_right_y.getAsDouble() * speedMultiplier;
+      double leftInput = leftDeadbanded * speedMultiplier;
+      double rightInput = rightDeadbanded * speedMultiplier;
 
       if (frc.robot.constants.TweakConstants.KINEMATIC_DRIVE_SMOOTHING) {
         leftInput = m_leftLimiter.calculate(leftInput);
