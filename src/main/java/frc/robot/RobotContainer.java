@@ -138,10 +138,10 @@ public class RobotContainer {
     // Joystick Bindings
     // (Removed queued shooter mode override)
 
-    // Turret Default Command (Bind to X-axis of flight stick)
+    // Turret Default Command (Bind to X-axis of flight stick, capped at 80% speed)
     m_turretSubsystem.setDefaultCommand(
         new RunCommand(
-            () -> m_turretSubsystem.setTurretSpeed(m_flightstick.getX()), m_turretSubsystem));
+            () -> m_turretSubsystem.setTurretSpeed(m_flightstick.getX() * 0.8), m_turretSubsystem));
 
     // Loader Default Command (Bind to Y-axis of flight stick)
     m_loaderSubsystem.setDefaultCommand(
@@ -149,7 +149,8 @@ public class RobotContainer {
             () -> m_loaderSubsystem.setLoaderSpeed(m_flightstick.getY()), m_loaderSubsystem));
 
     // Fire Control Command (Bind to Trigger / Button 1 of flight stick)
-    // Run at full speed (1.0) while trigger is held, rather than mapped to Y axis.
+    // Run at full speed (1.0) or regression test speed while trigger is held.
+    SmartDashboard.putNumber("Regression Test Firing Speed", 1.0);
     m_flightstick
         .button(Constants.JOYSTICK_DEFAULT_BUTTON)
         .and(() -> !m_turretSubsystem.isUnwinding())
@@ -161,13 +162,19 @@ public class RobotContainer {
             new FireCommand(
                 m_fireSubsystem,
                 m_loaderSubsystem,
-                () -> 1.0,
+                () -> SmartDashboard.getNumber("Regression Test Firing Speed", 1.0),
                 m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON)));
 
-    // Turret Preset Orientations (Buttons 6 - 11)
+    // Intake on Flight Stick (Button 6)
+    m_flightstick.button(6).whileTrue(
+            new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(1.0), m_intakeSubsystem));
+
+    // Loader 1 & 2 on Flight Stick (Button 7)
+    m_flightstick.button(7).whileTrue(
+            new RunCommand(() -> m_loaderSubsystem.setLoaderSpeed(1.0), m_loaderSubsystem));
+
+    // Turret Preset Orientations (Buttons 8 - 11)
     // Values are placeholders for raw motor rotations until gear ratio is determined.
-    m_flightstick.button(6).onTrue(new SetTurretPositionCommand(m_turretSubsystem, -90.0));
-    m_flightstick.button(7).onTrue(new SetTurretPositionCommand(m_turretSubsystem, -45.0));
     m_flightstick.button(8).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 0.0));
     m_flightstick.button(9).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 45.0));
     m_flightstick.button(10).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 90.0));
