@@ -19,10 +19,12 @@ This document serves as the master reference for all controller mappings and dri
 
 | Input | Action | Description |
 |:---|:---|:---|
-| **X-Axis** | Turret Manual Control | Manually rotates the Turret left and right. |
-| **Y-Axis** | Loader Speed | Pushing stick forward spins the 3-motor Loader inward. |
-| **Throttle Slider** | Intake Speed | Automatically scales the 2-motor Intake speed. |
-| **Trigger (Top)** | Fire Weapon | Activates feeder/kicker motor full speed to launch the ball. |
+| **X-Axis** | Turret Manual Control | Manually rotates the Turret left and right (Capped at 80% speed). |
+| **Y-Axis** | Loader Speed | Pushing stick forward spins Loader 1 & 2 inward. |
+| **Throttle Slider** | Intake Speed | Automatically scales the Intake speed. |
+| **Trigger (Top)** | Fire Weapon | Activates feeder/kicker motor at configured `Regression Test Firing Speed` (Default 100%). Also activates Loader 3. |
 | **Button 2** | Toggle Auto Aim | Activates auto-aim mode for targeting. |
-| **Buttons 6-11** | Turret Presets | Rotates the turret to predefined angular positions. |
+| **Button 6** | Manual Intake | Spins the intake at 100% speed. |
+| **Button 7** | Manual Loader | Spins Loader 1 & 2 at 100% speed. |
+| **Buttons 8-11** | Turret Presets | Rotates the turret to predefined angular positions (0, 45, 90, 180 degrees). |
 | **Button 12** | Emergency Unjam | Unjams the intake system. |
