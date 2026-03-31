@@ -11,11 +11,13 @@ import frc.robot.constants.Constants.CANConstants;
 
 public class FireControlIOSparkMax implements FireControlIO {
   private final SparkMax m_fireMotor;
+  private final SparkMax m_loaderMotor3;
   private final SparkClosedLoopController m_pidController;
 
   @SuppressWarnings("removal")
   public FireControlIOSparkMax() {
     m_fireMotor = new SparkMax(CANConstants.MOTOR_FIRE_ID, MotorType.kBrushless);
+    m_loaderMotor3 = new SparkMax(CANConstants.MOTOR_LOADER_3_ID, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
 
     config.smartCurrentLimit(40);
@@ -23,6 +25,11 @@ public class FireControlIOSparkMax implements FireControlIO {
     config.closedLoop.outputRange(0, 1.0);
 
     m_fireMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    SparkMaxConfig loaderConfig = new SparkMaxConfig();
+    loaderConfig.follow(m_fireMotor);
+    loaderConfig.smartCurrentLimit(30);
+    m_loaderMotor3.configure(loaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     m_pidController = m_fireMotor.getClosedLoopController();
   }
