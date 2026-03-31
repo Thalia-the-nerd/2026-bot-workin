@@ -35,7 +35,6 @@ class Database:
                         d = float(row["distance"])
                         a = float(row["angle"])
                         s = float(row["speed"])
-                        # If old data was RPM (e.g., 5000), try to normalize to 0-100%
                         if s > 100:
                             s = min(100.0, (s / 5000.0) * 100.0)
                         self.add_point(d, a, s)
@@ -71,9 +70,6 @@ def update_java_constants():
     if not data:
         return False, "No data to sync to Java!"
 
-    # Format data into a Java double array
-    # We output the speed directly as 0-100 or 0.0-1.0 depending on what the robot expects.
-    # To be safe and match the GUI "0-100%", we write the value / 100.0 so WPILib uses standard 0.0 to 1.0 limits.
     data_lines = []
     for p in data:
         speed_norm = p['speed'] / 100.0
@@ -103,7 +99,6 @@ public final class AutoAimConstants {{
         with open(CONSTANTS_FILE, "w") as f:
             f.write(content)
         
-        # Run spotless formatter
         subprocess.run(["./gradlew", "spotlessApply"], cwd=PROJECT_ROOT, check=True, 
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True, f"Synchronized {len(data)} points to Java and formatted code."
@@ -114,7 +109,7 @@ class FieldMap(tk.Canvas):
     def __init__(self, parent, app):
         super().__init__(parent, width=400, height=400, bg="#1e1e1e", highlightthickness=1, highlightbackground="#444")
         self.app = app
-        self.scale = 15.0 # pixels per unit distance
+        self.scale = 35.0 # Increased scale from 15.0 to 35.0 to zoom in on distances ~1-10 meters
         self.target_x = 200
         self.target_y = 50
         
@@ -125,16 +120,14 @@ class FieldMap(tk.Canvas):
         self.delete("all")
         
         # Draw arcs and radial lines
-        for d in range(5, 30, 5):
+        for d in range(1, 15):
             r = d * self.scale
             # Arc from -80 to +80
-            # Tkinter arc: start is from 3 o'clock, counterclockwise. 
-            # -80 deg from 'straight down' (which is 270 deg)
             self.create_arc(self.target_x - r, self.target_y - r, 
                             self.target_x + r, self.target_y + r, 
                             start=270-80, extent=160, style=tk.ARC, outline="#333", dash=(2,4))
             # Distance labels
-            if d % 10 == 0:
+            if d % 2 == 0:
                 self.create_text(self.target_x + 10, self.target_y + r, text=f"{d}u", fill="#555", font=("Arial", 8))
 
         # 0 degree line
@@ -159,7 +152,6 @@ class FieldMap(tk.Canvas):
             self.create_oval(px-6, py-6, px+6, py+6, fill="#ffff00", outline="white", dash=(2,2))
 
     def polar_to_px(self, distance, angle):
-        # 0 degrees is straight down the Y axis
         rad = math.radians(angle)
         dx = distance * self.scale * math.sin(rad)
         dy = distance * self.scale * math.cos(rad)
@@ -174,7 +166,6 @@ class FieldMap(tk.Canvas):
         return dist, angle
 
     def handle_click(self, event):
-        # Check if clicked on an existing point
         clicked_id = None
         for p in self.app.points:
             px, py = self.polar_to_px(p['distance'], p['angle'])
@@ -192,7 +183,7 @@ class FieldMap(tk.Canvas):
                 self.app.clear_selection()
                 self.app.dist_var.set(f"{dist:.2f}")
                 self.app.angle_var.set(f"{angle:.2f}")
-                self.app.speed_var.set("50.0") # Default 50% speed for new point
+                self.app.speed_var.set("50.0")
             else:
                 self.app.preview_point = None
         self.draw_field()
@@ -229,18 +220,15 @@ class AutoAimGUI(tk.Tk):
         main_frame = ttk.Frame(self)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Left: Map
         map_frame = ttk.LabelFrame(main_frame, text=" Live Map View ")
         map_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
         
         self.canvas = FieldMap(map_frame, self)
         self.canvas.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        # Right: Data & Controls
         right_frame = ttk.Frame(main_frame)
         right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
-        # Table
         table_frame = ttk.LabelFrame(right_frame, text=" Stored Firing Locations ")
         table_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
@@ -264,31 +252,25 @@ class AutoAimGUI(tk.Tk):
         
         self.tree.bind('<<TreeviewSelect>>', self.on_tree_select)
 
-        # Inputs
         input_frame = ttk.LabelFrame(right_frame, text=" Edit Location ")
         input_frame.pack(fill=tk.X, pady=(0, 10))
 
-        # ID
         ttk.Label(input_frame, text="ID:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.E)
         self.id_var = tk.StringVar(value="New")
         ttk.Entry(input_frame, textvariable=self.id_var, width=10, state='readonly').grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
 
-        # Distance
         ttk.Label(input_frame, text="Dist:").grid(row=0, column=2, padx=5, pady=5, sticky=tk.E)
         self.dist_var = tk.StringVar()
         ttk.Entry(input_frame, textvariable=self.dist_var, width=10).grid(row=0, column=3, padx=5, pady=5, sticky=tk.W)
 
-        # Angle
         ttk.Label(input_frame, text="Angle:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.E)
         self.angle_var = tk.StringVar()
         ttk.Entry(input_frame, textvariable=self.angle_var, width=10).grid(row=1, column=1, padx=5, pady=5, sticky=tk.W)
 
-        # Speed
         ttk.Label(input_frame, text="Speed %:").grid(row=1, column=2, padx=5, pady=5, sticky=tk.E)
         self.speed_var = tk.StringVar()
         ttk.Entry(input_frame, textvariable=self.speed_var, width=10).grid(row=1, column=3, padx=5, pady=5, sticky=tk.W)
 
-        # Buttons
         btn_frame = ttk.Frame(right_frame)
         btn_frame.pack(fill=tk.X)
 
@@ -319,7 +301,6 @@ class AutoAimGUI(tk.Tk):
 
     def select_point(self, pid):
         self.selected_id = pid
-        # Find in tree and select
         for p in self.points:
             if p['id'] == pid:
                 self.id_var.set(str(pid))
