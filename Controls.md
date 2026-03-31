@@ -20,9 +20,9 @@ This document serves as the master reference for all controller mappings and dri
 | Input | Action | Description |
 |:---|:---|:---|
 | **X-Axis** | Turret Manual Control | Manually rotates the Turret left and right (Capped at 80% speed). |
-| **Y-Axis** | Fire Speed | Pushing stick forward determines the target speed of the Fire motor. |
+| **Y-Axis** | Fire Speed | Pushing stick forward determines the target speed of the Fire motor. Can be overridden via `Regression Test Firing Speed Override` on SmartDashboard. |
 | **Throttle Slider** | Intake Speed | Automatically scales the Intake speed. |
-| **Trigger (Top)** | Fire Weapon | Activates feeder/kicker motor at speed determined by `Y-Axis`. Loader 1 & 2 feed at configured `Regression Test Loader Speed` (Default 100%). Also activates Loader 3. |
+| **Trigger (Top)** | Fire Weapon | Activates feeder/kicker motor at speed determined by `Y-Axis`. Loader 1 & 2 feed at 100% speed. Also activates Loader 3. |
 | **Button 2** | Toggle Auto Aim | Activates auto-aim mode for targeting. |
 | **Button 6** | Toggle Intake | Toggles the intake on/off at 100% speed. |
 | **Button 7** | Toggle Loader | Toggles Loader 1 & 2 on/off at 100% speed. |

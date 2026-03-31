@@ -144,8 +144,8 @@ public class RobotContainer {
             () -> m_turretSubsystem.setTurretSpeed(m_flightstick.getX() * 0.8), m_turretSubsystem));
 
     // Fire Control Command (Bind to Trigger / Button 1 of flight stick)
-    // Run at Y-axis speed while trigger is held. Loader feeds at SmartDashboard speed.
-    SmartDashboard.putNumber("Regression Test Loader Speed", 1.0);
+    // Run at Y-axis speed or SmartDashboard override while trigger is held. Loader feeds at 100%.
+    SmartDashboard.putNumber("Regression Test Firing Speed Override", -1.0);
     m_flightstick
         .button(Constants.JOYSTICK_DEFAULT_BUTTON)
         .and(() -> !m_turretSubsystem.isUnwinding())
@@ -157,7 +157,11 @@ public class RobotContainer {
             new FireCommand(
                 m_fireSubsystem,
                 m_loaderSubsystem,
-                () -> m_flightstick.getY(),
+                () -> {
+                  double override =
+                      SmartDashboard.getNumber("Regression Test Firing Speed Override", -1.0);
+                  return override != -1.0 ? override : m_flightstick.getY();
+                },
                 m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON)));
 
     // Intake on Flight Stick (Button 6) - Toggle
