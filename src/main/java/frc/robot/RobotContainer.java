@@ -161,11 +161,15 @@ public class RobotContainer {
                 m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON)));
 
     // Intake on Flight Stick (Button 6) - Toggle
-    m_flightstick.button(6).toggleOnTrue(
+    m_flightstick
+        .button(6)
+        .toggleOnTrue(
             new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(1.0), m_intakeSubsystem));
 
     // Loader 1 & 2 on Flight Stick (Button 7) - Toggle
-    m_flightstick.button(7).toggleOnTrue(
+    m_flightstick
+        .button(7)
+        .toggleOnTrue(
             new RunCommand(() -> m_loaderSubsystem.setLoaderSpeed(1.0), m_loaderSubsystem));
 
     // Turret Preset Orientations (Buttons 8 - 11)

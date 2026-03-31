@@ -29,7 +29,8 @@ public class FireControlIOSparkMax implements FireControlIO {
     SparkMaxConfig loaderConfig = new SparkMaxConfig();
     loaderConfig.follow(m_fireMotor);
     loaderConfig.smartCurrentLimit(30);
-    m_loaderMotor3.configure(loaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_loaderMotor3.configure(
+        loaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     m_pidController = m_fireMotor.getClosedLoopController();
   }
