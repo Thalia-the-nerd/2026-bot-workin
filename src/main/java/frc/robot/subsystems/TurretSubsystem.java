@@ -102,6 +102,9 @@ public class TurretSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    m_io.updateInputs(m_inputs);
+    Logger.processInputs("Turret", m_inputs);
+
     double currentAngle = getTurretAngleDegrees();
 
     // Check if we exceeded bounds and enter unwinding state
@@ -122,9 +125,6 @@ public class TurretSubsystem extends SubsystemBase {
         m_speedLimiter.reset(0);
       }
     }
-
-    m_io.updateInputs(m_inputs);
-    Logger.processInputs("Turret", m_inputs);
 
     // Output current state of turret motor for debugging
     RobotTelemetry.putNumber("Turret Motor Speed Output", m_inputs.appliedVolts / 12.0);
