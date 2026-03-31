@@ -1,7 +1,7 @@
 # Pre-Competition TODO
 
 ## Refactoring
-- [ ] 
+- [x] Refactor Turret, Launcher, Loader, and Intake functions for regression testing
 
 ## Programming
 - [ ] 
