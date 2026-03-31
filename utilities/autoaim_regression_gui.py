@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import sys
 import os
-import csv
 import argparse
 import subprocess
+import math
+import sqlite3
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -11,75 +12,72 @@ from tkinter import ttk, messagebox
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 CONSTANTS_FILE = os.path.join(PROJECT_ROOT, "src/main/java/frc/robot/AutoAimConstants.java")
-DATA_FILE = os.path.join(SCRIPT_DIR, "autoaim_data.csv")
+DB_FILE = os.path.join(SCRIPT_DIR, "autoaim_data.db")
 
-def load_data():
-    data = []
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, "r") as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    data.append({
-                        "distance": float(row["distance"]),
-                        "angle": float(row["angle"]),
-                        "speed": float(row["speed"])
-                    })
-        except Exception as e:
-            print(f"Error loading data: {e}")
-    # Sort data by distance for cleaner interpolation and display
-    return sorted(data, key=lambda x: x["distance"])
+class Database:
+    def __init__(self):
+        self.conn = sqlite3.connect(DB_FILE)
+        self.cursor = self.conn.cursor()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS points 
+                               (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                distance REAL, angle REAL, speed REAL)''')
+        self.conn.commit()
+        self.migrate_from_csv()
 
-def save_data(distance, angle, speed):
-    data = load_data()
-    # Check for existing distance to update instead of duplicate
-    updated = False
-    for point in data:
-        if abs(point["distance"] - distance) < 0.01:
-            point["angle"] = angle
-            point["speed"] = speed
-            updated = True
-            break
-    
-    if not updated:
-        data.append({"distance": distance, "angle": angle, "speed": speed})
-    
-    data = sorted(data, key=lambda x: x["distance"])
-    
-    try:
-        with open(DATA_FILE, "w", newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=["distance", "angle", "speed"])
-            writer.writeheader()
-            writer.writerows(data)
-        return True, "Success"
-    except Exception as e:
-        return False, str(e)
+    def migrate_from_csv(self):
+        csv_file = os.path.join(SCRIPT_DIR, "autoaim_data.csv")
+        if os.path.exists(csv_file):
+            import csv
+            try:
+                with open(csv_file, "r") as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        d = float(row["distance"])
+                        a = float(row["angle"])
+                        s = float(row["speed"])
+                        # If old data was RPM (e.g., 5000), try to normalize to 0-100%
+                        if s > 100:
+                            s = min(100.0, (s / 5000.0) * 100.0)
+                        self.add_point(d, a, s)
+                os.rename(csv_file, csv_file + ".bak")
+                print("Successfully migrated CSV data to SQLite database.")
+            except Exception as e:
+                print(f"Migration error: {e}")
 
-def delete_point_data(distance):
-    data = load_data()
-    data = [p for p in data if abs(p["distance"] - distance) >= 0.01]
-    
-    try:
-        with open(DATA_FILE, "w", newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=["distance", "angle", "speed"])
-            writer.writeheader()
-            writer.writerows(data)
-        return True
-    except Exception as e:
-        return False
+    def add_point(self, distance, angle, speed):
+        self.cursor.execute("INSERT INTO points (distance, angle, speed) VALUES (?, ?, ?)", (distance, angle, speed))
+        self.conn.commit()
+        return self.cursor.lastrowid
+
+    def update_point(self, pid, distance, angle, speed):
+        self.cursor.execute("UPDATE points SET distance=?, angle=?, speed=? WHERE id=?", (distance, angle, speed, pid))
+        self.conn.commit()
+
+    def delete_point(self, pid):
+        self.cursor.execute("DELETE FROM points WHERE id=?", (pid,))
+        self.conn.commit()
+
+    def get_all(self):
+        self.cursor.execute("SELECT id, distance, angle, speed FROM points ORDER BY distance")
+        return [{"id": r[0], "distance": r[1], "angle": r[2], "speed": r[3]} for r in self.cursor.fetchall()]
+
+db = Database()
 
 def update_java_constants():
     if not os.path.exists(os.path.dirname(CONSTANTS_FILE)):
         os.makedirs(os.path.dirname(CONSTANTS_FILE), exist_ok=True)
 
-    data = load_data()
+    data = db.get_all()
     if not data:
         return False, "No data to sync to Java!"
 
     # Format data into a Java double array
+    # We output the speed directly as 0-100 or 0.0-1.0 depending on what the robot expects.
+    # To be safe and match the GUI "0-100%", we write the value / 100.0 so WPILib uses standard 0.0 to 1.0 limits.
     data_lines = []
     for p in data:
-        data_lines.append(f"        {{{p['distance']}, {p['angle']}, {p['speed']}}}")
+        speed_norm = p['speed'] / 100.0
+        data_lines.append(f"        {{{p['distance']:.2f}, {p['angle']:.2f}, {speed_norm:.3f}}}")
     
     data_str = ",\n".join(data_lines)
     
@@ -89,7 +87,7 @@ def update_java_constants():
  * Constants for the Auto-Aim Interpolation Map.
  * THIS FILE IS AUTOMATICALLY GENERATED BY THE REGRESSION TOOL.
  * 
- * Data format: {{distance, angle, speed}}
+ * Data format: {{distance, angle, speed}} (Speed is 0.0 - 1.0 normalized)
  */
 public final class AutoAimConstants {{
     public static final double[][] RAW_DATA = {{
@@ -112,117 +110,270 @@ public final class AutoAimConstants {{
     except Exception as e:
         return False, f"Failed to update Java file: {e}"
 
+class FieldMap(tk.Canvas):
+    def __init__(self, parent, app):
+        super().__init__(parent, width=400, height=400, bg="#1e1e1e", highlightthickness=1, highlightbackground="#444")
+        self.app = app
+        self.scale = 15.0 # pixels per unit distance
+        self.target_x = 200
+        self.target_y = 50
+        
+        self.bind("<Button-1>", self.handle_click)
+        self.bind("<Motion>", self.handle_motion)
+
+    def draw_field(self):
+        self.delete("all")
+        
+        # Draw arcs and radial lines
+        for d in range(5, 30, 5):
+            r = d * self.scale
+            # Arc from -80 to +80
+            # Tkinter arc: start is from 3 o'clock, counterclockwise. 
+            # -80 deg from 'straight down' (which is 270 deg)
+            self.create_arc(self.target_x - r, self.target_y - r, 
+                            self.target_x + r, self.target_y + r, 
+                            start=270-80, extent=160, style=tk.ARC, outline="#333", dash=(2,4))
+            # Distance labels
+            if d % 10 == 0:
+                self.create_text(self.target_x + 10, self.target_y + r, text=f"{d}u", fill="#555", font=("Arial", 8))
+
+        # 0 degree line
+        self.create_line(self.target_x, self.target_y, self.target_x, 400, fill="#333", dash=(2,2))
+        
+        # Draw Target
+        self.create_oval(self.target_x-12, self.target_y-12, self.target_x+12, self.target_y+12, fill="#007acc", outline="#00ffff", width=2)
+        self.create_text(self.target_x, self.target_y-25, text="TARGET", fill="#00ffff", font=("Arial", 10, "bold"))
+
+        # Draw Points
+        for p in self.app.points:
+            px, py = self.polar_to_px(p['distance'], p['angle'])
+            is_selected = (p['id'] == self.app.selected_id)
+            color = "#00ff00" if is_selected else "#ff3333"
+            size = 8 if is_selected else 6
+            self.create_oval(px-size, py-size, px+size, py+size, fill=color, outline="white", width=1 if not is_selected else 2)
+            self.create_text(px, py+14, text=f"ID: {p['id']}", fill="white", font=("Arial", 8, "bold" if is_selected else "normal"))
+
+        # Draw Preview Point
+        if self.app.preview_point:
+            px, py = self.polar_to_px(self.app.preview_point['distance'], self.app.preview_point['angle'])
+            self.create_oval(px-6, py-6, px+6, py+6, fill="#ffff00", outline="white", dash=(2,2))
+
+    def polar_to_px(self, distance, angle):
+        # 0 degrees is straight down the Y axis
+        rad = math.radians(angle)
+        dx = distance * self.scale * math.sin(rad)
+        dy = distance * self.scale * math.cos(rad)
+        return self.target_x + dx, self.target_y + dy
+
+    def px_to_polar(self, px, py):
+        dx = px - self.target_x
+        dy = py - self.target_y
+        if dy <= 0: return None, None # Behind or exactly on target
+        dist = math.sqrt(dx**2 + dy**2) / self.scale
+        angle = math.degrees(math.atan2(dx, dy))
+        return dist, angle
+
+    def handle_click(self, event):
+        # Check if clicked on an existing point
+        clicked_id = None
+        for p in self.app.points:
+            px, py = self.polar_to_px(p['distance'], p['angle'])
+            if math.hypot(event.x - px, event.y - py) < 12:
+                clicked_id = p['id']
+                break
+        
+        if clicked_id is not None:
+            self.app.preview_point = None
+            self.app.select_point(clicked_id)
+        else:
+            dist, angle = self.px_to_polar(event.x, event.y)
+            if dist is not None and -80 <= angle <= 80:
+                self.app.preview_point = {'distance': dist, 'angle': angle}
+                self.app.clear_selection()
+                self.app.dist_var.set(f"{dist:.2f}")
+                self.app.angle_var.set(f"{angle:.2f}")
+                self.app.speed_var.set("50.0") # Default 50% speed for new point
+            else:
+                self.app.preview_point = None
+        self.draw_field()
+
+    def handle_motion(self, event):
+        dist, angle = self.px_to_polar(event.x, event.y)
+        if dist is not None and -80 <= angle <= 80:
+            self.config(cursor="crosshair")
+        else:
+            self.config(cursor="arrow")
 
 class AutoAimGUI(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("2026-Bot Auto-Aim Interpolation Manager")
-        self.geometry("650x450")
+        self.title("2026-Bot Firing Range & Auto-Aim Database")
+        self.geometry("900x500")
+        self.configure(bg="#2b2b2b")
         
-        # Style
         style = ttk.Style(self)
         if "clam" in style.theme_names():
             style.theme_use("clam")
+            
+        style.configure("TFrame", background="#2b2b2b")
+        style.configure("TLabel", background="#2b2b2b", foreground="#ffffff")
+        style.configure("TLabelframe", background="#2b2b2b", foreground="#ffffff")
+        style.configure("TLabelframe.Label", background="#2b2b2b", foreground="#ffffff", font=("Arial", 10, "bold"))
+        style.configure("Treeview", background="#333", foreground="#fff", fieldbackground="#333")
+        style.map("Treeview", background=[('selected', '#007acc')])
 
-        # Main Container
-        main_frame = ttk.Frame(self, padding="10")
-        main_frame.pack(fill=tk.BOTH, expand=True)
+        self.points = []
+        self.selected_id = None
+        self.preview_point = None
 
-        # Table Frame
-        table_frame = ttk.LabelFrame(main_frame, text=" Empirical Data Points ", padding="5")
+        main_frame = ttk.Frame(self)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # Left: Map
+        map_frame = ttk.LabelFrame(main_frame, text=" Live Map View ")
+        map_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        
+        self.canvas = FieldMap(map_frame, self)
+        self.canvas.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+        # Right: Data & Controls
+        right_frame = ttk.Frame(main_frame)
+        right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+        # Table
+        table_frame = ttk.LabelFrame(right_frame, text=" Stored Firing Locations ")
         table_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
-        columns = ("Distance", "Angle", "Speed")
+        columns = ("ID", "Distance", "Angle", "Speed %")
         self.tree = ttk.Treeview(table_frame, columns=columns, show="headings", selectmode="browse")
         
-        for col in columns:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, width=180, anchor=tk.CENTER)
+        self.tree.heading("ID", text="ID")
+        self.tree.column("ID", width=40, anchor=tk.CENTER)
+        self.tree.heading("Distance", text="Dist")
+        self.tree.column("Distance", width=70, anchor=tk.CENTER)
+        self.tree.heading("Angle", text="Angle (°)")
+        self.tree.column("Angle", width=70, anchor=tk.CENTER)
+        self.tree.heading("Speed %", text="Speed (%)")
+        self.tree.column("Speed %", width=80, anchor=tk.CENTER)
             
         scrollbar = ttk.Scrollbar(table_frame, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscroll=scrollbar.set)
         
-        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y, pady=5)
         
-        self.tree.bind('<<TreeviewSelect>>', self.on_select)
+        self.tree.bind('<<TreeviewSelect>>', self.on_tree_select)
 
-        # Input Frame
-        input_frame = ttk.Frame(main_frame)
+        # Inputs
+        input_frame = ttk.LabelFrame(right_frame, text=" Edit Location ")
         input_frame.pack(fill=tk.X, pady=(0, 10))
 
-        ttk.Label(input_frame, text="Distance:").grid(row=0, column=0, padx=(0,5), pady=5, sticky=tk.W)
+        # ID
+        ttk.Label(input_frame, text="ID:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.E)
+        self.id_var = tk.StringVar(value="New")
+        ttk.Entry(input_frame, textvariable=self.id_var, width=10, state='readonly').grid(row=0, column=1, padx=5, pady=5, sticky=tk.W)
+
+        # Distance
+        ttk.Label(input_frame, text="Dist:").grid(row=0, column=2, padx=5, pady=5, sticky=tk.E)
         self.dist_var = tk.StringVar()
-        ttk.Entry(input_frame, textvariable=self.dist_var, width=12).grid(row=0, column=1, padx=(0,15), pady=5)
+        ttk.Entry(input_frame, textvariable=self.dist_var, width=10).grid(row=0, column=3, padx=5, pady=5, sticky=tk.W)
 
-        ttk.Label(input_frame, text="Angle:").grid(row=0, column=2, padx=(0,5), pady=5, sticky=tk.W)
+        # Angle
+        ttk.Label(input_frame, text="Angle:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.E)
         self.angle_var = tk.StringVar()
-        ttk.Entry(input_frame, textvariable=self.angle_var, width=12).grid(row=0, column=3, padx=(0,15), pady=5)
+        ttk.Entry(input_frame, textvariable=self.angle_var, width=10).grid(row=1, column=1, padx=5, pady=5, sticky=tk.W)
 
-        ttk.Label(input_frame, text="Speed (RPM):").grid(row=0, column=4, padx=(0,5), pady=5, sticky=tk.W)
+        # Speed
+        ttk.Label(input_frame, text="Speed %:").grid(row=1, column=2, padx=5, pady=5, sticky=tk.E)
         self.speed_var = tk.StringVar()
-        ttk.Entry(input_frame, textvariable=self.speed_var, width=12).grid(row=0, column=5, padx=(0,0), pady=5)
+        ttk.Entry(input_frame, textvariable=self.speed_var, width=10).grid(row=1, column=3, padx=5, pady=5, sticky=tk.W)
 
-        # Button Frame
-        btn_frame = ttk.Frame(main_frame)
+        # Buttons
+        btn_frame = ttk.Frame(right_frame)
         btn_frame.pack(fill=tk.X)
 
-        ttk.Button(btn_frame, text="Add / Update", command=self.add_point).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(btn_frame, text="Delete Selected", command=self.delete_point).pack(side=tk.LEFT, padx=5)
+        self.save_btn = ttk.Button(btn_frame, text="Save Location", command=self.save_point)
+        self.save_btn.pack(side=tk.LEFT, padx=(0, 5))
         
-        sync_btn = ttk.Button(btn_frame, text="Sync to Robot Code", command=self.sync_code)
-        sync_btn.pack(side=tk.RIGHT)
+        self.del_btn = ttk.Button(btn_frame, text="Delete", command=self.delete_point)
+        self.del_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.sync_btn = ttk.Button(btn_frame, text="Sync to Robot", command=self.sync_code)
+        self.sync_btn.pack(side=tk.RIGHT)
 
-        self.refresh_table()
+        self.refresh_data()
 
-    def refresh_table(self):
+    def refresh_data(self):
+        self.points = db.get_all()
         for item in self.tree.get_children():
             self.tree.delete(item)
-        data = load_data()
-        for p in data:
-            self.tree.insert("", tk.END, values=(f"{p['distance']:.2f}", f"{p['angle']:.2f}", f"{p['speed']:.2f}"))
+        for p in self.points:
+            self.tree.insert("", tk.END, iid=str(p['id']), values=(p['id'], f"{p['distance']:.2f}", f"{p['angle']:.2f}", f"{p['speed']:.1f}"))
+        self.canvas.draw_field()
 
-    def on_select(self, event):
+    def clear_selection(self):
+        self.selected_id = None
+        self.id_var.set("New")
+        for item in self.tree.selection():
+            self.tree.selection_remove(item)
+
+    def select_point(self, pid):
+        self.selected_id = pid
+        # Find in tree and select
+        for p in self.points:
+            if p['id'] == pid:
+                self.id_var.set(str(pid))
+                self.dist_var.set(f"{p['distance']:.2f}")
+                self.angle_var.set(f"{p['angle']:.2f}")
+                self.speed_var.set(f"{p['speed']:.1f}")
+                self.tree.selection_set(str(pid))
+                self.tree.see(str(pid))
+                break
+
+    def on_tree_select(self, event):
         selected = self.tree.selection()
         if selected:
-            values = self.tree.item(selected[0], "values")
-            self.dist_var.set(values[0])
-            self.angle_var.set(values[1])
-            self.speed_var.set(values[2])
+            pid = int(selected[0])
+            self.preview_point = None
+            self.select_point(pid)
+            self.canvas.draw_field()
 
-    def add_point(self):
+    def save_point(self):
         try:
             d = float(self.dist_var.get())
             a = float(self.angle_var.get())
             s = float(self.speed_var.get())
-            success, msg = save_data(d, a, s)
-            if success:
-                self.refresh_table()
-                self.dist_var.set("")
-                self.angle_var.set("")
-                self.speed_var.set("")
+            
+            if not (-80 <= a <= 80):
+                messagebox.showwarning("Validation Error", "Angle must be between -80 and 80 degrees.")
+                return
+            if not (0 <= s <= 100):
+                messagebox.showwarning("Validation Error", "Speed must be between 0% and 100%.")
+                return
+            
+            if self.selected_id is None:
+                new_id = db.add_point(d, a, s)
+                self.preview_point = None
+                self.refresh_data()
+                self.select_point(new_id)
             else:
-                messagebox.showerror("Error", f"Failed to save data: {msg}")
+                db.update_point(self.selected_id, d, a, s)
+                self.refresh_data()
+                
         except ValueError:
-            messagebox.showwarning("Input Error", "Please enter valid numeric values for all fields.")
+            messagebox.showwarning("Input Error", "Please enter valid numeric values.")
 
     def delete_point(self):
-        selected = self.tree.selection()
-        if not selected:
-            messagebox.showinfo("Selection", "Please select a data point from the table to delete.")
-            return
-        
-        values = self.tree.item(selected[0], "values")
-        distance = float(values[0])
-        
-        if messagebox.askyesno("Confirm Delete", f"Delete the data point at Distance {distance}?"):
-            if delete_point_data(distance):
-                self.refresh_table()
+        if self.selected_id is not None:
+            if messagebox.askyesno("Confirm", f"Delete target location {self.selected_id}?"):
+                db.delete_point(self.selected_id)
+                self.clear_selection()
                 self.dist_var.set("")
                 self.angle_var.set("")
                 self.speed_var.set("")
-            else:
-                messagebox.showerror("Error", "Failed to delete the data point.")
+                self.refresh_data()
+        else:
+            messagebox.showinfo("Selection", "Select a point to delete.")
 
     def sync_code(self):
         success, msg = update_java_constants()
@@ -231,10 +382,9 @@ class AutoAimGUI(tk.Tk):
         else:
             messagebox.showerror("Sync Failed", msg)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Auto Aim Regression GUI Tool")
-    parser.add_argument("--sync", action="store_true", help="Sync existing CSV data to Java constants without opening GUI")
+    parser.add_argument("--sync", action="store_true", help="Sync existing DB to Java constants without opening GUI")
     args = parser.parse_args()
 
     if args.sync:
