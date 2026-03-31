@@ -6,7 +6,6 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.utils.HelperFunctions;
 import java.util.function.DoubleSupplier;
 
 /** The default drive command that uses the drive subsystem. */
@@ -50,13 +49,15 @@ public class DefaultDrive extends Command {
   public void execute() {
     // we include a limit on the drivers speed for safety.
     m_driveSubsystem.setReducedSpeed(false);
-    
+
     double leftRaw = m_left_y.getAsDouble();
     double rightRaw = m_right_y.getAsDouble();
-    
+
     // Apply deadband individually to each axis
-    double leftDeadbanded = edu.wpi.first.math.MathUtil.applyDeadband(leftRaw, Constants.CONTROLLER_DEAD_ZONE);
-    double rightDeadbanded = edu.wpi.first.math.MathUtil.applyDeadband(rightRaw, Constants.CONTROLLER_DEAD_ZONE);
+    double leftDeadbanded =
+        edu.wpi.first.math.MathUtil.applyDeadband(leftRaw, Constants.CONTROLLER_DEAD_ZONE);
+    double rightDeadbanded =
+        edu.wpi.first.math.MathUtil.applyDeadband(rightRaw, Constants.CONTROLLER_DEAD_ZONE);
 
     if (leftDeadbanded != 0.0 || rightDeadbanded != 0.0) {
       double speedMultiplier = 1.0;
