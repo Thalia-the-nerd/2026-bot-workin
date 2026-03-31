@@ -109,7 +109,7 @@ class FieldMap(tk.Canvas):
     def __init__(self, parent, app):
         super().__init__(parent, width=400, height=400, bg="#1e1e1e", highlightthickness=1, highlightbackground="#444")
         self.app = app
-        self.scale = 1.2 # 1.2 pixels per inch for a ~300 inch view
+        self.scale = 5.0 # 5.0 pixels per inch for a ~60 inch view filling the canvas
         self.target_x = 200
         self.target_y = 50
         
@@ -119,15 +119,14 @@ class FieldMap(tk.Canvas):
     def draw_field(self):
         self.delete("all")
         
-        # Draw arcs and radial lines every 10 inches
-        for d in range(10, 310, 10):
+        # Draw arcs and radial lines every 6 inches
+        for d in range(6, 66, 6):
             r = d * self.scale
             self.create_arc(self.target_x - r, self.target_y - r, 
                             self.target_x + r, self.target_y + r, 
                             start=270-80, extent=160, style=tk.ARC, outline="#333", dash=(2,4))
-            # Distance labels every 50 inches
-            if d % 50 == 0:
-                self.create_text(self.target_x + 10, self.target_y + r, text=f"{d}in", fill="#555", font=("Arial", 8))
+            # Distance labels every 6 inches
+            self.create_text(self.target_x + 10, self.target_y + r, text=f"{d}in", fill="#555", font=("Arial", 8))
 
         # 0 degree line
         self.create_line(self.target_x, self.target_y, self.target_x, 400, fill="#333", dash=(2,2))
