@@ -145,6 +145,14 @@ public class RobotContainer {
         new RunCommand(
             () -> m_turretSubsystem.setTurretSpeed(m_flightstick.getX() * 0.8), m_turretSubsystem));
 
+    // Intake Default Command
+    m_intakeSubsystem.setDefaultCommand(
+        new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(0.0), m_intakeSubsystem));
+
+    // Loader Default Command
+    m_loaderSubsystem.setDefaultCommand(
+        new RunCommand(() -> m_loaderSubsystem.setLoaderSpeed(0.0), m_loaderSubsystem));
+
     // Fire Control Command (Bind to Trigger / Button 1 of flight stick)
     // Run at Y-axis speed or SmartDashboard override while trigger is held. Loader feeds at 100%.
     SmartDashboard.putNumber("Regression Test Firing Speed Override", -1.0);

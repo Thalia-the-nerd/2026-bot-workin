@@ -61,10 +61,15 @@ public class IntakeIOSparkMax implements IntakeIO {
     m_intakeMotorMain.setVoltage(volts);
   }
 
+  @SuppressWarnings("removal")
   @Override
   public void setPivotAngle(double degrees) {
     m_pivotPidController.setReference(
-        degrees, ControlType.kPosition, com.revrobotics.spark.ClosedLoopSlot.kSlot0);
+        degrees,
+        ControlType.kPosition,
+        com.revrobotics.spark.ClosedLoopSlot.kSlot0,
+        0.0,
+        SparkClosedLoopController.ArbFFUnits.kVoltage);
   }
 
   @Override
