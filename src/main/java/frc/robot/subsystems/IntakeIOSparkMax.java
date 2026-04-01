@@ -14,8 +14,7 @@ public class IntakeIOSparkMax implements IntakeIO {
   @SuppressWarnings("removal")
   public IntakeIOSparkMax() {
     m_intakeMotorMain = new SparkMax(CANConstants.MOTOR_INTAKE_DRIVE_ID, MotorType.kBrushless);
-    m_intakeMotorSecondary =
-        new SparkMax(CANConstants.MOTOR_INTAKE_PIVOT_ID, MotorType.kBrushless);
+    m_intakeMotorSecondary = new SparkMax(CANConstants.MOTOR_INTAKE_PIVOT_ID, MotorType.kBrushless);
 
     SparkMaxConfig config = new SparkMaxConfig();
     config.idleMode(SparkMaxConfig.IdleMode.kCoast);
