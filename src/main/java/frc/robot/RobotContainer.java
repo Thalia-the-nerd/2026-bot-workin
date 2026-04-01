@@ -97,6 +97,9 @@ public class RobotContainer {
     } else {
       bindCommands();
     }
+
+    frc.robot.utils.CompetitionDashboard.setup(
+        autoDashboardChooser.getSendableChooser(), m_driveSubsystem);
   }
 
   private void bindCommands() {
