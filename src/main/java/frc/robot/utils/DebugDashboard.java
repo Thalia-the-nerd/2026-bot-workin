@@ -1,6 +1,7 @@
 package frc.robot.utils;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.DriveConstants;
 import frc.robot.constants.PIDConstants;
 import frc.robot.constants.SpeedConstants;
 import frc.robot.constants.TweakConstants;
@@ -22,12 +23,14 @@ public class DebugDashboard {
       syncClass(SpeedConstants.class, "Speed", false);
       syncClass(PIDConstants.class, "PID", false);
       syncClass(TweakConstants.class, "Tweak", false);
+      syncClass(DriveConstants.class, "Drive", false);
 
       initialized = true;
     } else if (tuningMode) {
       syncClass(SpeedConstants.class, "Speed", true);
       syncClass(PIDConstants.class, "PID", true);
       syncClass(TweakConstants.class, "Tweak", true);
+      syncClass(DriveConstants.class, "Drive", true);
     }
   }
 
