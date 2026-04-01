@@ -90,7 +90,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   /** Stops the turret motor. */
   public void stop() {
-    if (m_isUnwinding) return;
+    m_isUnwinding = false;
     m_io.stop();
     m_speedLimiter.reset(0); // Reset limiter so next move doesn't jump
   }
@@ -114,12 +114,12 @@ public class TurretSubsystem extends SubsystemBase {
 
     // Handle unwinding logic
     if (m_isUnwinding) {
-      m_io.setPosition(0.0);
+      double targetRotations = 0.0;
+      m_io.setPosition(targetRotations);
 
       // Check if we're back near 0 center
-      // Stiction and SparkMax deadband with an undertuned PID (kP=0.1) can cause
-      // the motor to stall ~18 degrees away from 0.0, so we use a wider 25.0 deg tolerance.
-      if (Math.abs(currentAngle) <= 25.0) {
+      // Narrowed tolerance to 5.0 degrees for better precision before returning control
+      if (Math.abs(currentAngle) <= 5.0) {
         m_isUnwinding = false;
         // Reset our rate limiter so the driver can cleanly regain control
         m_speedLimiter.reset(0);

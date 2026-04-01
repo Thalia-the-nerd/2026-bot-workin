@@ -204,7 +204,17 @@ public class RobotContainer {
   }
 
   public void disabledInit() {
+    stopAll();
     m_turretSubsystem.setTargetAngle(0.0);
+  }
+
+  public void stopAll() {
+    m_driveSubsystem.stop();
+    m_intakeSubsystem.stop();
+    m_intakeSubsystem.stopPivot();
+    m_fireSubsystem.stop();
+    m_loaderSubsystem.stop();
+    m_turretSubsystem.stop();
   }
 
   public edu.wpi.first.wpilibj2.command.Command getPitHealthCheckCommand() {

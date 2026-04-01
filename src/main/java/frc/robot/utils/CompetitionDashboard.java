@@ -21,7 +21,7 @@ public class CompetitionDashboard {
 
     // Add Drive/Gyro Info
     compTab
-        .addBoolean("Gyro Connected", () -> true) // Simple placeholder logic for gyro
+        .addBoolean("Gyro Connected", () -> drive.getRotation2d() != null)
         .withSize(1, 1)
         .withPosition(2, 0);
 
