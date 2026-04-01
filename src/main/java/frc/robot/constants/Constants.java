@@ -34,7 +34,7 @@ public final class Constants {
 
     /// Turret and Fire Subsystems
     public static final int MOTOR_TURRET_ID = 41;
-    public static final int MOTOR_FIRE_ID = 42; // fireing isnt working right now
+    public static final int MOTOR_FIRE_ID = 42;
   }
 
   // Is simulation
