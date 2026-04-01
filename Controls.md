@@ -21,10 +21,11 @@ This document serves as the master reference for all controller mappings and dri
 |:---|:---|:---|
 | **X-Axis** | Turret Manual Control | Manually rotates the Turret left and right (Capped at 80% speed). |
 | **Y-Axis** | Fire Speed | Pushing stick forward determines the target speed of the Fire motor. Can be overridden via `Regression Test Firing Speed Override` on SmartDashboard. |
-| **Throttle Slider** | Intake Speed | Automatically scales the Intake speed. |
+| **Throttle Slider** | Unassigned | Previously Intake Speed. |
 | **Trigger (Top)** | Fire Weapon | Activates feeder/kicker motor at speed determined by `Y-Axis`. Loader 1 & 2 feed at 100% speed. Also activates Loader 3. |
 | **Button 2** | Toggle Auto Aim | Activates auto-aim mode for targeting. |
-| **Button 6** | Toggle Intake | Toggles the intake on/off at 100% speed. |
+| **Button 6** | Toggle Intake | Toggles the intake roller on/off at 100% speed. |
 | **Button 7** | Toggle Loader | Toggles Loader 1 & 2 on/off at 100% speed. |
-| **Buttons 8-11** | Turret Presets | Rotates the turret to predefined angular positions (0, 45, 90, 180 degrees). |
+| **Button 8** | Toggle Intake Pivot | Alternates the intake pivot between 0 (up) and 45 degrees (down). |
+| **Buttons 9-11** | Turret Presets | Rotates the turret to predefined angular positions (45, 90, 180 degrees). |
 | **Button 12** | Emergency Unjam | Unjams the intake system. |

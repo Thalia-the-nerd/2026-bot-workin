@@ -67,4 +67,7 @@ public final class Constants {
 
   // Turret Subsystem
   public static final double TURRET_GEAR_RATIO = 10.0;
+
+  // Intake Subsystem
+  public static final double INTAKE_PIVOT_GEAR_RATIO = 100.0;
 }

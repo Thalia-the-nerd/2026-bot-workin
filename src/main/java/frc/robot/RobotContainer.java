@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AimCommand;
 import frc.robot.commands.DefaultDrive;
 import frc.robot.commands.FireCommand;
-import frc.robot.commands.IntakeSliderCommand;
 import frc.robot.commands.SetTurretPositionCommand;
 import frc.robot.commands.UnjamIntakeCommand;
 import frc.robot.constants.Constants;
@@ -176,17 +175,18 @@ public class RobotContainer {
         .toggleOnTrue(
             new RunCommand(() -> m_loaderSubsystem.setLoaderSpeed(1.0), m_loaderSubsystem));
 
-    // Turret Preset Orientations (Buttons 8 - 11)
+    // Intake Pivot Preset (Button 8) overwrites previous Turret Preset
+    m_flightstick
+        .button(8)
+        .onTrue(new InstantCommand(() -> m_intakeSubsystem.togglePivot(), m_intakeSubsystem));
+
+    // Turret Preset Orientations (Buttons 9 - 11)
     // Values are placeholders for raw motor rotations until gear ratio is determined.
-    m_flightstick.button(8).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 0.0));
     m_flightstick.button(9).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 45.0));
     m_flightstick.button(10).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 90.0));
     m_flightstick.button(11).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 180.0));
 
-    // Intake System
-    // Bind fuzzy slider (Flightstick Throttle axis) to automatically control the Intake.
-    m_intakeSubsystem.setDefaultCommand(
-        new IntakeSliderCommand(m_intakeSubsystem, () -> m_flightstick.getThrottle()));
+    // Intake System operates on buttons now. Default command is removed to avoid slider conflicts.
 
     // Emergency Unjam (Button 12)
     m_flightstick.button(12).onTrue(new UnjamIntakeCommand(m_intakeSubsystem));
