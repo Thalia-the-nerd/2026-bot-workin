@@ -12,10 +12,10 @@
 - [x] Improved Regression CLI tool for better data management
 
 ## Scouting Ourselves
-- [ ] 
+- [ ]
 
 ## PID Test
-- [ ] 
+- [ ]
 
 ## Running Utils
 - [x] Updated language breakdown and optimized regression utilities

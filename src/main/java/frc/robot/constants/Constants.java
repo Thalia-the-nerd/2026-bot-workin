@@ -18,23 +18,23 @@ public final class Constants {
   public static final class CANConstants {
     // CAN Bus Devices
     /// Drive Train Motors
-    public static final int MOTOR_FRONT_RIGHT_ID = 1;
-    public static final int MOTOR_BACK_RIGHT_ID = 2;
-    public static final int MOTOR_FRONT_LEFT_ID = 3;
-    public static final int MOTOR_BACK_LEFT_ID = 4;
+    public static final int MOTOR_FRONT_RIGHT_ID = 11;
+    public static final int MOTOR_BACK_RIGHT_ID = 12;
+    public static final int MOTOR_FRONT_LEFT_ID = 13;
+    public static final int MOTOR_BACK_LEFT_ID = 14;
 
     /// Intake Subsystem
-    public static final int MOTOR_INTAKE_MAIN_ID = 5;
-    public static final int MOTOR_INTAKE_SECONDARY_ID = 6;
+    public static final int MOTOR_INTAKE_DRIVE_ID = 21;
+    public static final int MOTOR_INTAKE_PIVOT_ID = 22;
 
     /// Loader Subsystem
-    public static final int MOTOR_LOADER_1_ID = 7;
-    public static final int MOTOR_LOADER_2_ID = 8;
-    public static final int MOTOR_LOADER_3_ID = 9;
+    public static final int MOTOR_TURRET_CHANNEL_ID = 31;
+    public static final int MOTOR_SPINDEXER_ID = 32;
+    public static final int MOTOR_LOADER_ID = 33;
 
     /// Turret and Fire Subsystems
-    public static final int MOTOR_TURRET_ID = 10;
-    public static final int MOTOR_FIRE_ID = 11;
+    public static final int MOTOR_TURRET_ID = 41;
+    public static final int MOTOR_FIRE_ID = 42; // fireing isnt working right now
   }
 
   // Is simulation
