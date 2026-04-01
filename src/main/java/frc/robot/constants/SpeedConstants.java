@@ -8,10 +8,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public final class SpeedConstants {
   // Drive Train (Back motors linked to front)
-  public static double FRONT_RIGHT_MAX_SPEED = 85.0; // Reduced from 100 to 75
+  public static double FRONT_RIGHT_MAX_SPEED = 90.0; // Reduced from 100 to 75
   public static double FRONT_RIGHT_SENSITIVITY = 100.0;
 
-  public static double FRONT_LEFT_MAX_SPEED = 85.0; // Reduced from 100 to 75
+  public static double FRONT_LEFT_MAX_SPEED = 90.0; // Reduced from 100 to 75
   public static double FRONT_LEFT_SENSITIVITY = 100.0;
 
   // Intake Subsystem
