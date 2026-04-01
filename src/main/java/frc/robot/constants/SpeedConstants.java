@@ -36,7 +36,7 @@ public final class SpeedConstants {
   public static double TURRET_SENSITIVITY = 30.0;
 
   // Fire Subsystem
-  public static double FIRE_MAX_SPEED = 100.0;
+  public static double FIRE_MAX_SPEED = 5000.0;
   public static double FIRE_SENSITIVITY = 100.0;
 
   public static boolean TUNING_MODE = false;

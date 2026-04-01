@@ -47,11 +47,7 @@ public class FireCommand extends Command {
     // Apply a deadband to ignore slightly noisy inputs, then clamp between 0 and 1
     double speed = MathUtil.clamp(MathUtil.applyDeadband(rawSpeed, 0.1), 0.0, 1.0);
 
-    double targetRPM =
-        frc.robot.constants.SpeedConstants.adjustSpeed(
-            speed,
-            frc.robot.constants.SpeedConstants.FIRE_MAX_SPEED,
-            frc.robot.constants.SpeedConstants.FIRE_SENSITIVITY);
+    double targetRPM = speed * frc.robot.constants.SpeedConstants.FIRE_MAX_SPEED;
     m_fireSubsystem.setShooterRPM(targetRPM);
 
     // Only feed if target RPM is > 0 and the flywheels have reached the target
