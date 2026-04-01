@@ -205,7 +205,6 @@ public class RobotContainer {
 
   public void disabledInit() {
     stopAll();
-    m_turretSubsystem.setTargetAngle(0.0);
   }
 
   public void stopAll() {

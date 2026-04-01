@@ -22,7 +22,7 @@ public final class TweakConstants {
   // 9. MUTE_DASHBOARD_ALERTS
   public static boolean MUTE_DASHBOARD_ALERTS = false;
   // 10. ENABLE_PIT_HEALTH_CHECK_ON_START
-  public static boolean ENABLE_PIT_HEALTH_CHECK_ON_START = true;
+  public static boolean ENABLE_PIT_HEALTH_CHECK_ON_START = false;
   // 11. ENABLE_TURRET_UNWIND
   public static boolean ENABLE_TURRET_UNWIND = true;
   // 12. USE_RUST_LEAD_CALCULATOR
@@ -58,7 +58,7 @@ public final class TweakConstants {
   // 46. IGNORE_SPINUP_TIME
   public static boolean IGNORE_SPINUP_TIME = false;
   // 48. AUTO_HOME_TURRET_ON_DISABLE
-  public static boolean AUTO_HOME_TURRET_ON_DISABLE = true;
+  public static boolean AUTO_HOME_TURRET_ON_DISABLE = false;
   // 52. DISPLAY_BIRDSEYE_MAP_DASHBOARD
   public static boolean DISPLAY_BIRDSEYE_MAP_DASHBOARD = true;
   // 59. FAST_BOOT_RIO_MODE
