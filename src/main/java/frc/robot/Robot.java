@@ -147,7 +147,7 @@ public class Robot extends LoggedRobot {
       }
     }
 
-    frc.robot.constants.SpeedConstants.syncNetworkTables();
+    frc.robot.utils.DebugDashboard.sync();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
