@@ -20,7 +20,7 @@ public class FireControlIOSparkMax implements FireControlIO {
 
     config.smartCurrentLimit(40);
     config.closedLoop.pid(0.001, 0, 0);
-    config.closedLoop.outputRange(0, 1.0);
+    config.closedLoop.outputRange(-1.0, 1.0);
 
     m_fireMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
@@ -41,7 +41,8 @@ public class FireControlIOSparkMax implements FireControlIO {
         velocityRPM,
         ControlType.kVelocity,
         com.revrobotics.spark.ClosedLoopSlot.kSlot0,
-        feedforwardVolts);
+        feedforwardVolts,
+        SparkClosedLoopController.ArbFFUnits.kVoltage);
   }
 
   @Override

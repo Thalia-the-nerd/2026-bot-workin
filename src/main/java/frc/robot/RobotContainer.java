@@ -160,7 +160,7 @@ public class RobotContainer {
                 () -> {
                   double override =
                       SmartDashboard.getNumber("Regression Test Firing Speed Override", -1.0);
-                  return override != -1.0 ? override : m_flightstick.getY();
+                  return override != -1.0 ? override : 1.0;
                 },
                 m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON)));
 
