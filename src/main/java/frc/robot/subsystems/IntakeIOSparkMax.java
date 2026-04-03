@@ -11,74 +11,64 @@ import frc.robot.constants.Constants;
 import frc.robot.constants.Constants.CANConstants;
 
 public class IntakeIOSparkMax implements IntakeIO {
-  private final SparkMax m_intakeMotorMain;
-  private final SparkMax m_intakeMotorSecondary;
-  private final SparkClosedLoopController m_pivotPidController;
+  private final SparkMax m_intakeMotorRun;
+  private final SparkMax m_intakeMotorPivot;
 
   @SuppressWarnings("removal")
   public IntakeIOSparkMax() {
-    m_intakeMotorMain = new SparkMax(CANConstants.MOTOR_INTAKE_DRIVE_ID, MotorType.kBrushless);
-    m_intakeMotorSecondary = new SparkMax(CANConstants.MOTOR_INTAKE_PIVOT_ID, MotorType.kBrushless);
+    m_intakeMotorRun = new SparkMax(CANConstants.MOTOR_INTAKE_DRIVE_ID, MotorType.kBrushless);
+    m_intakeMotorPivot = new SparkMax(CANConstants.MOTOR_INTAKE_PIVOT_ID, MotorType.kBrushless);
 
     SparkMaxConfig config = new SparkMaxConfig();
     config.idleMode(SparkMaxConfig.IdleMode.kCoast);
     config.openLoopRampRate(0.25);
     config.smartCurrentLimit(40);
 
-    m_intakeMotorMain.configure(
+    m_intakeMotorRun.configure(
         config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     SparkMaxConfig pivotConfig = new SparkMaxConfig();
     pivotConfig.idleMode(SparkMaxConfig.IdleMode.kBrake);
     pivotConfig.smartCurrentLimit(30);
-    pivotConfig.closedLoop.pid(0.1, 0, 0); // Basic placeholder P gain
-    pivotConfig.closedLoop.outputRange(-1.0, 1.0);
     // Configure encoder to output in degrees based on the gear ratio
     pivotConfig.encoder.positionConversionFactor(360.0 / Constants.INTAKE_PIVOT_GEAR_RATIO);
 
-    m_intakeMotorSecondary.configure(
+    m_intakeMotorPivot.configure(
         pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    m_pivotPidController = m_intakeMotorSecondary.getClosedLoopController();
-    m_intakeMotorSecondary.getEncoder().setPosition(0.0); // Assume starting position is 0
+    
+    m_intakeMotorPivot.getEncoder().setPosition(0.0); // Assume starting position is 0
   }
 
   @Override
   public void updateInputs(IntakeIOInputs inputs) {
-    inputs.mainMotorAppliedVolts =
-        m_intakeMotorMain.getAppliedOutput() * m_intakeMotorMain.getBusVoltage();
-    inputs.mainMotorCurrentAmps = m_intakeMotorMain.getOutputCurrent();
-    inputs.mainMotorVelocityRPM = m_intakeMotorMain.getEncoder().getVelocity();
+    inputs.runMotorAppliedVolts =
+        m_intakeMotorRun.getAppliedOutput() * m_intakeMotorRun.getBusVoltage();
+    inputs.runMotorCurrentAmps = m_intakeMotorRun.getOutputCurrent();
+    inputs.runMotorVelocityRPM = m_intakeMotorRun.getEncoder().getVelocity();
 
     inputs.pivotMotorAppliedVolts =
-        m_intakeMotorSecondary.getAppliedOutput() * m_intakeMotorSecondary.getBusVoltage();
-    inputs.pivotMotorCurrentAmps = m_intakeMotorSecondary.getOutputCurrent();
-    inputs.pivotPositionDeg = m_intakeMotorSecondary.getEncoder().getPosition();
+        m_intakeMotorPivot.getAppliedOutput() * m_intakeMotorPivot.getBusVoltage();
+    inputs.pivotMotorCurrentAmps = m_intakeMotorPivot.getOutputCurrent();
+    inputs.pivotPositionDeg = m_intakeMotorPivot.getEncoder().getPosition();
   }
 
   @Override
-  public void setVoltage(double volts) {
-    m_intakeMotorMain.setVoltage(volts);
+  public void setRunVoltage(double volts) {
+    m_intakeMotorRun.setVoltage(volts);
   }
 
-  @SuppressWarnings("removal")
   @Override
-  public void setPivotAngle(double degrees) {
-    m_pivotPidController.setReference(
-        degrees,
-        ControlType.kPosition,
-        com.revrobotics.spark.ClosedLoopSlot.kSlot0,
-        0.0,
-        SparkClosedLoopController.ArbFFUnits.kVoltage);
+  public void setPivotVoltage(double volts) {
+    m_intakeMotorPivot.setVoltage(volts);
   }
 
   @Override
   public void stop() {
-    m_intakeMotorMain.stopMotor();
+    m_intakeMotorRun.stopMotor();
   }
 
   @Override
   public void stopPivot() {
-    m_intakeMotorSecondary.stopMotor();
+    m_intakeMotorPivot.stopMotor();
   }
 }
