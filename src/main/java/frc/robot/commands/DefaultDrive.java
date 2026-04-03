@@ -60,26 +60,8 @@ public class DefaultDrive extends Command {
         edu.wpi.first.math.MathUtil.applyDeadband(rightRaw, Constants.CONTROLLER_DEAD_ZONE);
 
     if (leftDeadbanded != 0.0 || rightDeadbanded != 0.0) {
-      double speedMultiplier = 1.0;
-      if (frc.robot.constants.TweakConstants.LIMIT_DRIVE_SPEED_TO_75
-          && !frc.robot.constants.TweakConstants.BOOST_MODE_OVERRIDE) {
-        speedMultiplier = 0.75;
-      }
-      if (frc.robot.constants.TweakConstants.SLOW_MODE_MODIFIER_ACTIVE
-          && m_precision_mode.getAsBoolean()) {
-        speedMultiplier = 0.3;
-      }
-
-      double leftInput = leftDeadbanded * speedMultiplier;
-      double rightInput = rightDeadbanded * speedMultiplier;
-
-      if (frc.robot.constants.TweakConstants.KINEMATIC_DRIVE_SMOOTHING) {
-        leftInput = m_leftLimiter.calculate(leftInput);
-        rightInput = m_rightLimiter.calculate(rightInput);
-      } else {
-        m_leftLimiter.reset(leftInput);
-        m_rightLimiter.reset(rightInput);
-      }
+      double leftInput = m_leftLimiter.calculate(leftDeadbanded);
+      double rightInput = m_rightLimiter.calculate(rightDeadbanded);
 
       this.m_driveSubsystem.tankDrive(
           Constants.MAX_SPEED * leftInput, Constants.MAX_SPEED * rightInput);
