@@ -43,26 +43,26 @@ public class IntakeSubsystemTest {
             });
   }
 
-  // ─── setIntakeSpeed ───────────────────────────────────────────────
+  // ─── setRunSpeed ───────────────────────────────────────────────
 
   @Test
   public void testSetIntakeSpeed_zero_doesNotThrow() {
-    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(0.0), "setIntakeSpeed(0.0) must not throw");
+    assertDoesNotThrow(() -> m_intake.setRunSpeed(0.0), "setRunSpeed(0.0) must not throw");
   }
 
   @Test
   public void testSetIntakeSpeed_fullForward_doesNotThrow() {
-    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(1.0), "setIntakeSpeed(1.0) must not throw");
+    assertDoesNotThrow(() -> m_intake.setRunSpeed(1.0), "setRunSpeed(1.0) must not throw");
   }
 
   @Test
   public void testSetIntakeSpeed_fullReverse_doesNotThrow() {
-    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(-1.0), "setIntakeSpeed(-1.0) must not throw");
+    assertDoesNotThrow(() -> m_intake.setRunSpeed(-1.0), "setRunSpeed(-1.0) must not throw");
   }
 
   @Test
   public void testSetIntakeSpeed_halfSpeed_doesNotThrow() {
-    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(0.5), "setIntakeSpeed(0.5) must not throw");
+    assertDoesNotThrow(() -> m_intake.setRunSpeed(0.5), "setRunSpeed(0.5) must not throw");
   }
 
   // ─── stop ────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ public class IntakeSubsystemTest {
 
   @Test
   public void testStop_afterForwardRun_doesNotThrow() {
-    m_intake.setIntakeSpeed(1.0);
+    m_intake.setRunSpeed(1.0);
     assertDoesNotThrow(() -> m_intake.stop(), "stop() after running forward must not throw");
   }
 
@@ -99,11 +99,11 @@ public class IntakeSubsystemTest {
   public void testJamDetection_noCurrentInSim_doesNotJam() {
     // In sim, output current is 0A, so the jam threshold (30A) is never crossed.
     // Run several periodic ticks to confirm no jam is detected.
-    m_intake.setIntakeSpeed(1.0);
+    m_intake.setRunSpeed(1.0);
     for (int i = 0; i < 50; i++) {
       m_intake.periodic();
     }
-    // If the intake had jammed, setIntakeSpeed would be silently blocked.
+    // If the intake had jammed, setRunSpeed would be silently blocked.
     // We can verify the system is still responsive by calling stop without exception.
     assertDoesNotThrow(
         () -> m_intake.stop(),
@@ -116,10 +116,10 @@ public class IntakeSubsystemTest {
   public void testSpeedAdjustment_callsAdjustSpeedWithMaxAndSensitivity() {
     // Smoke test: confirm the intake applies SpeedConstants adjustment without crashing
     // at boundary conditions
-    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(0.0));
-    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(1.0));
-    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(-1.0));
-    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(0.5));
-    assertDoesNotThrow(() -> m_intake.setIntakeSpeed(-0.5));
+    assertDoesNotThrow(() -> m_intake.setRunSpeed(0.0));
+    assertDoesNotThrow(() -> m_intake.setRunSpeed(1.0));
+    assertDoesNotThrow(() -> m_intake.setRunSpeed(-1.0));
+    assertDoesNotThrow(() -> m_intake.setRunSpeed(0.5));
+    assertDoesNotThrow(() -> m_intake.setRunSpeed(-0.5));
   }
 }
