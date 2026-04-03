@@ -113,11 +113,11 @@ public class RobotContainer {
         .a()
         .and(() -> !m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON).getAsBoolean())
         .toggleOnTrue(
-            new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(1.0), m_intakeSubsystem));
+            new RunCommand(() -> m_intakeSubsystem.setRunSpeed(1.0), m_intakeSubsystem));
     m_controller1
         .leftTrigger()
         .and(() -> !m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON).getAsBoolean())
-        .whileTrue(new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(-1.0), m_intakeSubsystem));
+        .whileTrue(new RunCommand(() -> m_intakeSubsystem.setRunSpeed(-1.0), m_intakeSubsystem));
 
     // Fire Override
     m_controller1
@@ -141,7 +141,7 @@ public class RobotContainer {
 
     // Intake Default Command
     m_intakeSubsystem.setDefaultCommand(
-        new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(0.0), m_intakeSubsystem));
+        new RunCommand(() -> m_intakeSubsystem.setRunSpeed(0.0), m_intakeSubsystem));
 
     // Loader Default Command
     m_loaderSubsystem.setDefaultCommand(
@@ -169,7 +169,7 @@ public class RobotContainer {
     m_flightstick
         .button(6)
         .toggleOnTrue(
-            new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(1.0), m_intakeSubsystem));
+            new RunCommand(() -> m_intakeSubsystem.setRunSpeed(1.0), m_intakeSubsystem));
 
     // Loader 1 & 2 on Flight Stick (Button 7) - Toggle
     m_flightstick
@@ -177,16 +177,9 @@ public class RobotContainer {
         .toggleOnTrue(
             new RunCommand(() -> m_loaderSubsystem.setLoaderSpeed(1.0), m_loaderSubsystem));
 
-    // Intake Pivot Preset (Button 8) overwrites previous Turret Preset
-    m_flightstick
-        .button(8)
-        .onTrue(new InstantCommand(() -> m_intakeSubsystem.togglePivot(), m_intakeSubsystem));
-
-    // Turret Preset Orientations (Buttons 9 - 11)
-    // Values are placeholders for raw motor rotations until gear ratio is determined.
-    m_flightstick.button(9).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 45.0));
-    m_flightstick.button(10).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 90.0));
-    m_flightstick.button(11).onTrue(new SetTurretPositionCommand(m_turretSubsystem, 180.0));
+    // Intake Pivot Manual Control (Buttons 9 and 10)
+    m_flightstick.button(9).whileTrue(new RunCommand(() -> m_intakeSubsystem.setPivotSpeed(-1.0), m_intakeSubsystem));
+    m_flightstick.button(10).whileTrue(new RunCommand(() -> m_intakeSubsystem.setPivotSpeed(1.0), m_intakeSubsystem));
 
     // Intake System operates on buttons now. Default command is removed to avoid slider conflicts.
 

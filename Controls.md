@@ -10,9 +10,9 @@ This document serves as the master reference for all controller mappings and dri
 | **Right Stick Y-Axis** | Drive Right Sides | Controls the speed of the right track/wheels (Tank Drive). |
 | **Left Bumper** | Toggle Precision Mode | Hold to limit maximum speed to 30% for fine adjustments. |
 | **Right Bumper** | Toggle Brake/Coast | Toggles the drivetrain between Brake and Coast mode. |
-| **Left Trigger** | Unjam / Reverse Intake | Reverses the intake if a piece gets stuck. |
+| **Left Trigger** | Unjam / Reverse Intake | Reverses the intake run motor if a piece gets stuck. |
 | **Right Trigger** | Fire Override | Allows the driver to shoot without the operator. |
-| **Button A** | Toggle Intake | Enables the driver to quickly spin up or stop the intake. |
+| **Button A** | Toggle Intake | Enables the driver to quickly spin up or stop the intake run motor. |
 | **Button Y** | Switch Queued Mode | Toggles the queued shooter state. |
 
 ## Secondary Operator (Flight Stick - Port 1)
@@ -24,8 +24,9 @@ This document serves as the master reference for all controller mappings and dri
 | **Throttle Slider** | Unassigned | Previously Intake Speed. |
 | **Trigger (Top)** | Fire Weapon | Activates feeder/kicker motor at speed determined by `Y-Axis`. Loader 1 & 2 feed at 100% speed. Also activates Loader 3. |
 | **Button 2** | Toggle Auto Aim | Activates auto-aim mode for targeting. |
-| **Button 6** | Toggle Intake | Toggles the intake roller on/off at 100% speed. |
+| **Button 6** | Toggle Intake | Toggles the intake run roller on/off at 100% speed. |
 | **Button 7** | Toggle Loader | Toggles Loader 1 & 2 on/off at 100% speed. |
-| **Button 8** | Toggle Intake Pivot | Alternates the intake pivot between 0 (up) and 45 degrees (down). |
-| **Buttons 9-11** | Turret Presets | Rotates the turret to predefined angular positions (45, 90, 180 degrees). |
+| **Button 8** | Unused | Previously Pivot Preset (removed). |
+| **Button 9** | Intake Pivot UP | Manually runs the intake pivot motor in the UP direction. |
+| **Button 10** | Intake Pivot DOWN | Manually runs the intake pivot motor in the DOWN direction. |
 | **Button 12** | Emergency Unjam | Unjams the intake system. |
