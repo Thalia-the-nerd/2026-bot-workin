@@ -5,9 +5,9 @@ import org.littletonrobotics.junction.AutoLog;
 public interface IntakeIO {
   @AutoLog
   public static class IntakeIOInputs {
-    public double mainMotorAppliedVolts = 0.0;
-    public double mainMotorCurrentAmps = 0.0;
-    public double mainMotorVelocityRPM = 0.0;
+    public double runMotorAppliedVolts = 0.0;
+    public double runMotorCurrentAmps = 0.0;
+    public double runMotorVelocityRPM = 0.0;
 
     public double pivotMotorAppliedVolts = 0.0;
     public double pivotMotorCurrentAmps = 0.0;
@@ -17,11 +17,11 @@ public interface IntakeIO {
   /** Updates the set of loggable inputs. */
   public default void updateInputs(IntakeIOInputs inputs) {}
 
-  /** Run the main motor at the specified voltage. */
-  public default void setVoltage(double volts) {}
+  /** Run the run motor at the specified voltage. */
+  public default void setRunVoltage(double volts) {}
 
-  /** Set the target angle in degrees for the pivot motor. */
-  public default void setPivotAngle(double degrees) {}
+  /** Set the target voltage for the pivot motor. */
+  public default void setPivotVoltage(double volts) {}
 
   /** Stop the motors. */
   public default void stop() {}
