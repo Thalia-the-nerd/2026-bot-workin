@@ -60,15 +60,10 @@ public class DefaultDrive extends Command {
         edu.wpi.first.math.MathUtil.applyDeadband(rightRaw, Constants.CONTROLLER_DEAD_ZONE);
 
     if (leftDeadbanded != 0.0 || rightDeadbanded != 0.0) {
-      double leftInput = m_leftLimiter.calculate(leftDeadbanded);
-      double rightInput = m_rightLimiter.calculate(rightDeadbanded);
-
       this.m_driveSubsystem.tankDrive(
-          Constants.MAX_SPEED * leftInput, Constants.MAX_SPEED * rightInput);
+          Constants.MAX_SPEED * leftDeadbanded, Constants.MAX_SPEED * rightDeadbanded);
     } else {
       // Must explicitly stop if within deadzone or else motors will coast at last value
-      m_leftLimiter.reset(0.0);
-      m_rightLimiter.reset(0.0);
       this.m_driveSubsystem.tankDrive(0, 0);
     }
   }
