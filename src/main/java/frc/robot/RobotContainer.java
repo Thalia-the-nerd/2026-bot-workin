@@ -141,7 +141,12 @@ public class RobotContainer {
 
     // Intake Default Command
     m_intakeSubsystem.setDefaultCommand(
-        new RunCommand(() -> m_intakeSubsystem.setRunSpeed(0.0), m_intakeSubsystem));
+        new RunCommand(
+            () -> {
+              m_intakeSubsystem.setRunSpeed(0.0);
+              m_intakeSubsystem.setPivotSpeed(0.0);
+            },
+            m_intakeSubsystem));
 
     // Loader Default Command
     m_loaderSubsystem.setDefaultCommand(
