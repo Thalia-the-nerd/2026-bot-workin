@@ -41,7 +41,7 @@ public class IntakeSliderCommand extends Command {
     // Ensure we don't accidentally command outside the max speed bounds due to slight noise
     speed = Math.max(0.0, Math.min(1.0, speed));
 
-    m_intakeSubsystem.setIntakeSpeed(speed);
+    m_intakeSubsystem.setRunSpeed(speed);
   }
 
   @Override

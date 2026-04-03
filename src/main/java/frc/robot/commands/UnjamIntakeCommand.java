@@ -33,7 +33,7 @@ public class UnjamIntakeCommand extends Command {
   @Override
   public void execute() {
     // Force the intake into reverse regardless of the flight stick throttle position
-    m_intakeSubsystem.setIntakeSpeed(UNJAM_SPEED);
+    m_intakeSubsystem.setRunSpeed(UNJAM_SPEED);
   }
 
   @Override

@@ -46,7 +46,7 @@ public class PitHealthCheckCommand extends Command {
     // Stage 0: 0s to 1s -> Intake
     if (m_stage == 0) {
       if (time < 1.0) {
-        m_intake.setIntakeSpeed(0.2);
+        m_intake.setRunSpeed(0.2);
       } else {
         m_intake.stop();
         m_stage++;

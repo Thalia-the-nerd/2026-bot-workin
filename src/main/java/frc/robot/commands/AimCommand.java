@@ -88,11 +88,6 @@ public class AimCommand extends SequentialCommandGroup {
 
               Transform3d targetOffset = cameraToTarget.plus(targetingOffset);
 
-                        new Transform3d(
-                            new Translation3d(-robotMovementX, -robotMovementY, 0),
-                            new Rotation3d()));
-              }
-
               RobotTelemetry.recordOutput("AimTargetRelRobotPose", targetOffset);
 
               Pose3d robotPose = new Pose3d(d_subsystem.getPose());
