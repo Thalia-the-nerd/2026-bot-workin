@@ -13,11 +13,11 @@ public final class SpeedConstants {
   public static double FRONT_LEFT_SENSITIVITY = 100.0;
 
   // Intake Subsystem
-  public static double INTAKE_MAIN_MAX_SPEED = 100.0;
-  public static double INTAKE_MAIN_SENSITIVITY = 100.0;
+  public static double INTAKE_RUN_MAX_SPEED = 100.0;
+  public static double INTAKE_RUN_SENSITIVITY = 100.0;
 
-  public static double INTAKE_SECONDARY_MAX_SPEED = 100.0;
-  public static double INTAKE_SECONDARY_SENSITIVITY = 100.0;
+  public static double INTAKE_PIVOT_MAX_SPEED = 20.0;
+  public static double INTAKE_PIVOT_SENSITIVITY = 100.0;
 
   // Loader Subsystem
   public static double LOADER_1_MAX_SPEED = 100.0;
