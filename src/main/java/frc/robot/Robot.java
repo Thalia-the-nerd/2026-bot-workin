@@ -54,7 +54,7 @@ public class Robot extends LoggedRobot {
     switch (Constants.CURRENT_MODE) {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
-        if (frc.robot.constants.TweakConstants.RECORD_TELEMETRY_TO_USB) {
+        if (true) {
           java.io.File usb1 = new java.io.File("/media/sda1");
           java.io.File usb2 = new java.io.File("/media/sda2");
           if (usb1.exists() && usb1.isDirectory()) {
@@ -93,19 +93,6 @@ public class Robot extends LoggedRobot {
     // Start logging! No more data receivers, replay sources, or metadata values may be added.
     Logger.start();
 
-    if (frc.robot.constants.TweakConstants.DISABLE_BROWNOUT_PROTECTION) {
-      edu.wpi.first.wpilibj.RobotController.setBrownoutVoltage(0.0);
-    }
-
-    if (frc.robot.constants.TweakConstants.FAST_BOOT_RIO_MODE) {
-      System.out.println("FAST BOOT RIO MODE ENABLED! Skipping deep init checks.");
-    }
-
-    if (frc.robot.constants.TweakConstants.ENABLE_PIT_HEALTH_CHECK_ON_START) {
-      // Pit health check requested
-      System.out.println("Pit Health Check routine requested on startup.");
-    }
-
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
@@ -140,8 +127,7 @@ public class Robot extends LoggedRobot {
     }
 
     // Check for Battery Sagging
-    if (frc.robot.constants.TweakConstants.BATTERY_SAGGING_ALERT
-        && !frc.robot.constants.TweakConstants.OVERRIDE_BATTERY_SENSE) {
+    if (true) {
       if (edu.wpi.first.wpilibj.RobotController.getBatteryVoltage() < 11.0) {
         System.out.println("WARNING: BATTERY VOLTAGE SAG DETECTED (< 11.0V)!");
       }
@@ -152,12 +138,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {
-    if (frc.robot.constants.TweakConstants.AUTO_HOME_TURRET_ON_DISABLE
-        && m_robotContainer != null) {
-      m_robotContainer.disabledInit();
-    }
-  }
+  public void disabledInit() {}
 
   @Override
   public void disabledPeriodic() {}
@@ -185,12 +166,6 @@ public class Robot extends LoggedRobot {
     // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
-    }
-
-    if (frc.robot.constants.TweakConstants.ENABLE_PIT_HEALTH_CHECK_ON_START
-        && m_robotContainer != null) {
-      edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance()
-          .schedule(m_robotContainer.getPitHealthCheckCommand());
     }
   }
 

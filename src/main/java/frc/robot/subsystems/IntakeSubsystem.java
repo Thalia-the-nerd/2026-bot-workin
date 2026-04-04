@@ -84,9 +84,7 @@ public class IntakeSubsystem extends SubsystemBase {
       }
     } else {
       boolean active = Math.abs(m_inputs.mainMotorAppliedVolts) > 1.2;
-      if (frc.robot.constants.TweakConstants.ENABLE_STALL_DETECTION
-          && current > STALL_CURRENT_THRESHOLD
-          && active) {
+      if (current > STALL_CURRENT_THRESHOLD && active) {
         if (m_stallTimer.hasElapsed(STALL_TIME_THRESHOLD)) {
           // Jam detected!
           m_isStalled = true;

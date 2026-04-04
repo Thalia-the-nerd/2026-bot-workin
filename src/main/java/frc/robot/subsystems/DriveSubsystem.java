@@ -122,15 +122,12 @@ public class DriveSubsystem extends SubsystemBase {
     m_backLeftConfig.inverted(false);
     m_frontLeftConfig.inverted(false);
 
-    SparkMaxConfig.IdleMode idleMode =
-        frc.robot.constants.TweakConstants.ENABLE_DYNAMIC_BRAKING
-            ? SparkMaxConfig.IdleMode.kBrake
-            : SparkMaxConfig.IdleMode.kCoast;
+    SparkMaxConfig.IdleMode idleMode = SparkMaxConfig.IdleMode.kBrake;
     m_backLeftConfig.idleMode(idleMode);
     m_backRightConfig.idleMode(idleMode);
     m_frontLeftConfig.idleMode(idleMode);
     m_frontRightConfig.idleMode(idleMode);
-    isBrakeMode = frc.robot.constants.TweakConstants.ENABLE_DYNAMIC_BRAKING;
+    isBrakeMode = true;
 
     // setup main and secondary motors
     m_frontLeftConfig.follow(m_backLeft); // set front left to follow back left
@@ -191,10 +188,6 @@ public class DriveSubsystem extends SubsystemBase {
             // Boolean supplier that controls when the path will be mirrored for the red alliance
             // This will flip the path being followed to the red side of the field.
             // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-            if (frc.robot.constants.TweakConstants.FORCE_RED_ALLIANCE_MODE) {
-              return true;
-            }
             var alliance = DriverStation.getAlliance();
             if (alliance.isPresent()) {
               return alliance.get() == DriverStation.Alliance.Red;

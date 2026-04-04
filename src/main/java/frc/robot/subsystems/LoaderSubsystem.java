@@ -27,15 +27,7 @@ public class LoaderSubsystem extends SubsystemBase {
     double rawSpeed =
         SpeedConstants.adjustSpeed(
             speed, SpeedConstants.LOADER_1_MAX_SPEED, SpeedConstants.LOADER_1_SENSITIVITY);
-    double adjustedSpeed =
-        frc.robot.constants.TweakConstants.SMOOTH_LOADER_MOTORS
-            ? m_speedLimiter.calculate(rawSpeed)
-            : rawSpeed;
-
-    // Always call calculate to keep the internal state matched even if not smoothed
-    if (!frc.robot.constants.TweakConstants.SMOOTH_LOADER_MOTORS) {
-      m_speedLimiter.reset(rawSpeed);
-    }
+    double adjustedSpeed = m_speedLimiter.calculate(rawSpeed);
 
     m_io.setVoltage(adjustedSpeed * 12.0);
   }
