@@ -111,18 +111,12 @@ public class RobotContainer {
     // Intake
     m_controller1
         .a()
-        .and(
-            () ->
-                !frc.robot.constants.TweakConstants.DISABLE_INTAKE_DURING_FIRE
-                    || !m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON).getAsBoolean())
+        .and(() -> !m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON).getAsBoolean())
         .toggleOnTrue(
             new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(1.0), m_intakeSubsystem));
     m_controller1
         .leftTrigger()
-        .and(
-            () ->
-                !frc.robot.constants.TweakConstants.DISABLE_INTAKE_DURING_FIRE
-                    || !m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON).getAsBoolean())
+        .and(() -> !m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON).getAsBoolean())
         .whileTrue(new RunCommand(() -> m_intakeSubsystem.setIntakeSpeed(-1.0), m_intakeSubsystem));
 
     // Fire Override
@@ -159,10 +153,7 @@ public class RobotContainer {
     m_flightstick
         .button(Constants.JOYSTICK_DEFAULT_BUTTON)
         .and(() -> !m_turretSubsystem.isUnwinding())
-        .and(
-            () ->
-                frc.robot.constants.TweakConstants.ALLOW_FIRE_WHILE_MOVING
-                    || Math.abs(m_driveSubsystem.getSpeeds().vxMetersPerSecond) < 0.1)
+        .and(() -> Math.abs(m_driveSubsystem.getSpeeds().vxMetersPerSecond) < 0.1)
         .whileTrue(
             new FireCommand(
                 m_fireSubsystem,
@@ -254,12 +245,12 @@ public class RobotContainer {
 
   public double getControllerRightY() {
     double y = -m_controller1.getRightY();
-    return frc.robot.constants.TweakConstants.INVERT_DRIVE_CONTROLS ? -y : y;
+    return y;
   }
 
   public double getControllerLeftY() {
     double y = -m_controller1.getLeftY();
-    return frc.robot.constants.TweakConstants.INVERT_DRIVE_CONTROLS ? -y : y;
+    return y;
   }
 
   public double GetFlightStickY() {
