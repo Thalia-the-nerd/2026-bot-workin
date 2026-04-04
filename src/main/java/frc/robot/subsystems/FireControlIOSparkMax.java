@@ -21,7 +21,7 @@ public class FireControlIOSparkMax implements FireControlIO {
     config.smartCurrentLimit(40);
     config.closedLoop.pid(0.001, 0, 0);
     config.closedLoop.outputRange(-1.0, 1.0);
-
+    config.inverted(true);
     m_fireMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     m_pidController = m_fireMotor.getClosedLoopController();
