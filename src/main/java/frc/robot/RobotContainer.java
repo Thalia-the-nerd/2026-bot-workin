@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.AimCommand;
 import frc.robot.commands.DefaultDrive;
 import frc.robot.commands.FireCommand;
-import frc.robot.commands.SetTurretPositionCommand;
 import frc.robot.commands.UnjamIntakeCommand;
 import frc.robot.constants.Constants;
 import frc.robot.subsystems.CameraSubsystem;
@@ -112,8 +111,7 @@ public class RobotContainer {
     m_controller1
         .a()
         .and(() -> !m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON).getAsBoolean())
-        .toggleOnTrue(
-            new RunCommand(() -> m_intakeSubsystem.setRunSpeed(1.0), m_intakeSubsystem));
+        .toggleOnTrue(new RunCommand(() -> m_intakeSubsystem.setRunSpeed(1.0), m_intakeSubsystem));
     m_controller1
         .leftTrigger()
         .and(() -> !m_flightstick.button(Constants.JOYSTICK_DEFAULT_BUTTON).getAsBoolean())
@@ -173,8 +171,7 @@ public class RobotContainer {
     // Intake on Flight Stick (Button 6) - Toggle
     m_flightstick
         .button(6)
-        .toggleOnTrue(
-            new RunCommand(() -> m_intakeSubsystem.setRunSpeed(1.0), m_intakeSubsystem));
+        .toggleOnTrue(new RunCommand(() -> m_intakeSubsystem.setRunSpeed(1.0), m_intakeSubsystem));
 
     // Loader 1 & 2 on Flight Stick (Button 7) - Toggle
     m_flightstick
@@ -183,8 +180,12 @@ public class RobotContainer {
             new RunCommand(() -> m_loaderSubsystem.setLoaderSpeed(1.0), m_loaderSubsystem));
 
     // Intake Pivot Manual Control (Buttons 9 and 10)
-    m_flightstick.button(9).whileTrue(new RunCommand(() -> m_intakeSubsystem.setPivotSpeed(-1.0), m_intakeSubsystem));
-    m_flightstick.button(10).whileTrue(new RunCommand(() -> m_intakeSubsystem.setPivotSpeed(1.0), m_intakeSubsystem));
+    m_flightstick
+        .button(9)
+        .whileTrue(new RunCommand(() -> m_intakeSubsystem.setPivotSpeed(-1.0), m_intakeSubsystem));
+    m_flightstick
+        .button(10)
+        .whileTrue(new RunCommand(() -> m_intakeSubsystem.setPivotSpeed(1.0), m_intakeSubsystem));
 
     // Intake System operates on buttons now. Default command is removed to avoid slider conflicts.
 

@@ -1,9 +1,7 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -35,7 +33,7 @@ public class IntakeIOSparkMax implements IntakeIO {
 
     m_intakeMotorPivot.configure(
         pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    
+
     m_intakeMotorPivot.getEncoder().setPosition(0.0); // Assume starting position is 0
   }
 
