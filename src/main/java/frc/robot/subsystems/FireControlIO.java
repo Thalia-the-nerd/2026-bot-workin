@@ -13,7 +13,7 @@ public interface FireControlIO {
   public default void updateInputs(FireControlIOInputs inputs) {}
 
   public default void setVelocity(double velocityRPM, double feedforwardVolts) {}
-  
+
   /** Direct voltage control for the fire motor. */
   public default void setVoltage(double volts) {}
 
