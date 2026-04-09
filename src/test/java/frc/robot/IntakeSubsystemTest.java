@@ -27,12 +27,12 @@ public class IntakeSubsystemTest {
 
               @Override
               public void updateInputs(IntakeIOInputs inputs) {
-                inputs.mainMotorAppliedVolts = volts;
-                inputs.mainMotorCurrentAmps = 0.0; // Simulated
+                inputs.runMotorAppliedVolts = volts;
+                inputs.runMotorCurrentAmps = 0.0; // Simulated
               }
 
               @Override
-              public void setVoltage(double v) {
+              public void setRunVoltage(double v) {
                 volts = v;
               }
 

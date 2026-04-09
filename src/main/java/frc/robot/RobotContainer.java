@@ -156,7 +156,6 @@ public class RobotContainer {
     m_flightstick
         .button(Constants.JOYSTICK_DEFAULT_BUTTON)
         .and(() -> !m_turretSubsystem.isUnwinding())
-        .and(() -> Math.abs(m_driveSubsystem.getSpeeds().vxMetersPerSecond) < 0.1)
         .whileTrue(
             new FireCommand(
                 m_fireSubsystem,
