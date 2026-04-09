@@ -42,17 +42,13 @@ public class FireCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // Math.abs to ensure positive velocity based on Y-axis
-    double rawSpeed = Math.abs(m_speedSupplier.getAsDouble());
-    // Apply a deadband to ignore slightly noisy inputs, then clamp between 0 and 1
-    double speed = MathUtil.clamp(MathUtil.applyDeadband(rawSpeed, 0.1), 0.0, 1.0);
+    // 100% Power Voltage Control
+    m_fireSubsystem.setShooterVoltage(12.0);
 
-    double targetRPM = speed * frc.robot.constants.SpeedConstants.FIRE_MAX_SPEED;
-    m_fireSubsystem.setShooterRPM(targetRPM);
-
-    // Only feed if target RPM is > 0 and the flywheels have reached the target
-    if (targetRPM > 100 && m_fireSubsystem.isAtRPM(targetRPM, 150.0)) {
-      m_loaderSubsystem.setLoaderSpeed(1.0); // Full speed feed
+    // Only feed via Loader if the flywheel has had a moment to spin up
+    // We'll use a simple timer or just check RPM if telemetry is working
+    if (m_fireSubsystem.isAtRPM(3000, 2000)) { // Very broad check to ensure it's spinning
+      m_loaderSubsystem.setLoaderSpeed(1.0);
     } else {
       m_loaderSubsystem.stop();
     }

@@ -43,6 +43,16 @@ public class FireControlSubsystem extends SubsystemBase {
   }
 
   /**
+   * Sets the shooter to a specific voltage.
+   *
+   * @param volts The voltage to apply.
+   */
+  public void setShooterVoltage(double volts) {
+    m_spinDownLimiter.reset(0);
+    m_io.setVoltage(volts);
+  }
+
+  /**
    * Checks if the flywheel is at the target RPM within a given tolerance.
    *
    * @param targetRPM The target RPM.

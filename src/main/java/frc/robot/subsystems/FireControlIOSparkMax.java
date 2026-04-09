@@ -46,6 +46,11 @@ public class FireControlIOSparkMax implements FireControlIO {
   }
 
   @Override
+  public void setVoltage(double volts) {
+    m_fireMotor.setVoltage(volts);
+  }
+
+  @Override
   public void stop() {
     m_fireMotor.stopMotor();
   }
